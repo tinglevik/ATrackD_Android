@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Отступ точки/анимации от иконки активности -->
+    <dimen name="activity_icon_dot_spacing">2dp</dimen>
+    <!-- Размер точки индикатора -->
+    <dimen name="activity_dot_size">4dp</dimen>
+
+    <!-- Отступы для кастомного уведомления (т.к. мы убираем DecoratedCustomViewStyle) -->
+    <dimen name="notification_horizontal_margin">12dp</dimen>
+    <dimen name="notification_vertical_margin">8dp</dimen>
+</resources>
