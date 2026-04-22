@@ -156,6 +156,7 @@ class TodayViewModel(
                     name = activity.name,
                     color = activity.color.value.toLong(),
                     icon = activity.icon,
+                    showInQuickPanel = activity.showInQuickPanel,
                     tagIds = activity.tagIds
                 )
             )
