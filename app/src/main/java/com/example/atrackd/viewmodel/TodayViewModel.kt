@@ -180,7 +180,7 @@ class TodayViewModel(
 
     fun stopActivity(activityId: Long) {
         viewModelScope.launch {
-            repository.closeAllActiveSessions()
+            repository.stopActivitySession(activityId)
         }
     }
 
