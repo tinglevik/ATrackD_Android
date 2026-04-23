@@ -21,8 +21,8 @@ fun CircleIconButton(
     modifier: Modifier = Modifier,
     painter: Painter? = null,
     size: Dp = 40.dp,
-    containerColor: Color = Color.Transparent, // цвет заполнения
-    iconTint: Color = MaterialTheme.colorScheme.primary, // цвет иконки
+    containerColor: Color = Color.Transparent,
+    iconTint: Color = MaterialTheme.colorScheme.primary,
 ) {
     Surface(
         onClick = onClick,

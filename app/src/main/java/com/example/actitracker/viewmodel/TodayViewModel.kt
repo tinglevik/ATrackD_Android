@@ -71,9 +71,7 @@ class TodayViewModel(
         viewModelScope.launch {
             val today = getStartOfToday()
             settingsDataStore.firstStartTimesFlow.collect { savedStarts ->
-                _firstStartTimes.value = savedStarts.filter { (_, time) ->
-                    time >= today
-                }
+                _firstStartTimes.value = savedStarts.filter { it.value >= today }
             }
         }
     }

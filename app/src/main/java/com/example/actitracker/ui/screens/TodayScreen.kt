@@ -282,7 +282,7 @@ fun TodayScreen(
 
         // Dialogs
         if (isCreating) {
-            val context = androidx.compose.ui.platform.LocalContext.current
+            val emptyNameError = stringResource(R.string.error_name_empty)
             EditActivityDialog(
                 activity = ActivityItem(-1, "", Color.Cyan, "Task"),
                 allTags = allTags,
@@ -291,7 +291,7 @@ fun TodayScreen(
                 onSave = {
                     if (it.name.isBlank()) {
                         scope.launch {
-                            snackbarHostState.showSnackbar(context.getString(R.string.error_name_empty))
+                            snackbarHostState.showSnackbar(emptyNameError)
                         }
                     } else {
                         onCreateSave(it)

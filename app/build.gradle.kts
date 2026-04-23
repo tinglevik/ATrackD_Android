@@ -2,7 +2,6 @@ plugins {
     id("com.android.application")
     id("com.google.devtools.ksp")
     id("org.jetbrains.kotlin.plugin.compose")
-//    kotlin("android")
 }
 
 android {
@@ -59,86 +58,82 @@ dependencies {
     // -----------------------------
     // Compose BOM
     // -----------------------------
-    implementation(platform("androidx.compose:compose-bom:2026.03.01"))
-    implementation("androidx.core:core-ktx:1.18.0")
-    implementation("androidx.compose.foundation:foundation-layout:1.10.6")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2026.03.01"))
+    implementation(platform(libs.compose.bom))
+    implementation(libs.core.ktx)
+    implementation(libs.foundation.layout)
+    androidTestImplementation(platform(libs.compose.bom))
 
     // -----------------------------
     // Core Android
     // -----------------------------
-    implementation("androidx.appcompat:appcompat:1.7.1")
-    implementation("com.google.android.material:material:1.13.0")
+    implementation(libs.appcompat)
+    implementation(libs.material)
 
     // -----------------------------
     // Compose
     // -----------------------------
-    implementation("androidx.activity:activity-compose")
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-graphics")
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.material3:material3")
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.graphics)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.androidx.compose.material3)
 
     // -----------------------------
     // Lifecycle
     // -----------------------------
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.10.0")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0")
+    implementation(libs.lifecycle.runtime.ktx)
+    implementation(libs.lifecycle.viewmodel.compose)
 
     // -----------------------------
     // Navigation
     // -----------------------------
-    implementation("androidx.navigation:navigation-compose:2.9.7")
+    implementation(libs.navigation.compose)
 
     // -----------------------------
     // Room
     // -----------------------------
-    implementation("androidx.room:room-runtime:2.8.4")
-    implementation("androidx.room:room-ktx:2.8.4")
-    ksp("androidx.room:room-compiler:2.8.4")
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
 
     // -----------------------------
     // DataStore (для настроек и состояния таймера)
     // -----------------------------
-    implementation("androidx.datastore:datastore-preferences:1.2.1")
+    implementation(libs.datastore.preferences)
 
     // -----------------------------
     // Charts
     // -----------------------------
-    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    implementation(libs.mpandroidchart)
 
     // -----------------------------
     // Icons
     // -----------------------------
-    implementation("androidx.compose.material:material-icons-extended:1.7.8")
+    implementation(libs.material.icons.extended)
 
     // -----------------------------
     // Serialization
     // -----------------------------
-    implementation("com.google.code.gson:gson:2.13.2")
+    implementation(libs.gson)
 
     // -----------------------------
     // Additional UI
     // -----------------------------
-    implementation("com.google.accompanist:accompanist-systemuicontroller:0.36.0")
+    implementation(libs.accompanist.systemuicontroller)
 
     // -----------------------------
     // Debug
     // -----------------------------
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
+    debugImplementation(libs.androidx.compose.ui.tooling)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 
     // -----------------------------
     // Tests
     // -----------------------------
-    testImplementation("junit:junit:4.13.2")
+    testImplementation(libs.junit)
 
-    androidTestImplementation("androidx.test.ext:junit:1.3.0")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    androidTestImplementation(libs.ext.junit)
+    androidTestImplementation(libs.espresso.core)
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
 
-    // -----------------------------
-    // Added for color picker implementation
-    // -----------------------------
-    implementation("androidx.datastore:datastore-preferences:1.2.1")
 }
