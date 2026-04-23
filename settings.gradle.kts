@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "ATrackD"
+rootProject.name = "ActiTracker"
 include(":app")

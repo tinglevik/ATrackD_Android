@@ -43,7 +43,7 @@
             android:id="@+id/activity_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="10sp"
+            android:textSize="11sp"
             android:gravity="center"
             android:maxLines="1"
             android:ellipsize="end"

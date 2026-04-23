@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.atrackd"
+    namespace = "com.example.actitracker"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.atrackd"
+        applicationId = "com.example.actitracker"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
@@ -115,7 +115,7 @@ dependencies {
     // -----------------------------
     // Serialization
     // -----------------------------
-    implementation("com.google.code.gson:gson:2.12.1")
+    implementation("com.google.code.gson:gson:2.13.2")
 
     // -----------------------------
     // Additional UI

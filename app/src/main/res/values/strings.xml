@@ -1,4 +1,174 @@
 <resources>
-    <string name="app_name">ATrackD</string>
+    <string name="app_name">ActiTracker</string>
     <string name="title_activity_main">MainActivity</string>
+    <string name="nav_today">Today</string>
+    <string name="nav_report">Report</string>
+    <string name="nav_settings">Settings</string>
+    <string name="manage_activities_title">Manage Activities</string>
+    <string name="manage_tags_title">Manage Tags</string>
+    <string name="manage_goals_title">Manage Goals</string>
+    <string name="delete_item_title">Delete item?</string>
+    <string name="delete_item_confirm">Are you sure?</string>
+
+    <!-- Today Screen -->
+    <string name="add_activity">Add</string>
+    <string name="task_header">Task</string>
+    <string name="filter_all_tags">All tags</string>
+    <string name="filter_no_tag">No tag</string>
+    <string name="filter_description">Filter</string>
+    <string name="search_hint">Search</string>
+    <string name="clear_search">Clear</string>
+    <string name="error_name_empty">Name cannot be empty</string>
+    <string name="manage_activities_desc">Manage activities</string>
+    <string name="manage_button">Manage</string>
+    <string name="current_task_header">Current task</string>
+    <string name="no_activity_running">No activity running</string>
+    <string name="stop_activity_desc">Stop</string>
+    <string name="first_start_label">First start: %1$s</string>
+
+    <!-- Report Screen -->
+    <string name="prev_period">Prev</string>
+    <string name="next_period">Next</string>
+    <string name="switch_to_tags">Switch to Tags</string>
+    <string name="switch_to_activities">Switch to Activities</string>
+    <string name="no_report_data">No data for this period</string>
+    <string name="total_time_label">Total</string>
+    <string name="no_tag_label">No Tag</string>
+    <string name="unknown_tag_label">Unknown Tag</string>
+    <string name="period_7_days">7 Days</string>
+    <string name="period_30_days">30 Days</string>
+    <string name="period_year">Year</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_background_color">Background Color</string>
+    <string name="settings_background_color_desc">Tap to change app background</string>
+    <string name="settings_content_color">Text &amp; Icons Color</string>
+    <string name="settings_content_color_desc">Tap to change text and icons color</string>
+    <string name="settings_about">About</string>
+    <string name="settings_licenses">Open Source Licenses</string>
+    <string name="settings_licenses_desc">Credits and legal information</string>
+    <string name="contrast_warning_background">Choose a background that contrasts well with your text color</string>
+    <string name="contrast_warning_text">Choose a text color that contrasts well with your background</string>
+    <string name="settings_reverted">Changes reverted</string>
+    <string name="settings_saved">Changes saved</string>
+
+    <!-- Edit Activity Dialog -->
+    <string name="create_activity_title">Create Activity</string>
+    <string name="edit_activity_title">Edit Activity</string>
+    <string name="activity_name_label">Name</string>
+    <string name="activity_color_label">Color</string>
+    <string name="activity_icon_label">Icon</string>
+    <string name="activity_tag_label">Tag</string>
+    <string name="add_tag_button">+ TAG</string>
+    <string name="no_more_tags">No more tags</string>
+    <string name="remove_tag_desc">Remove tag</string>
+    <string name="show_in_notification_label">Show in notification</string>
+    <string name="show_in_notification_desc">Quick access from notification bar\nand lock screen</string>
+    <string name="save_button">Save</string>
+    <string name="cancel_button">Cancel</string>
+    <string name="delete_button">Delete</string>
+
+    <!-- Manage Activities Screen -->
+    <string name="add_button">Add</string>
+
+    <!-- Edit Tag Dialog -->
+    <string name="create_tag_title">Create Tag</string>
+    <string name="edit_tag_title">Edit Tag</string>
+    <string name="tag_name_label">Name</string>
+    <string name="tag_color_label">Color</string>
+    <string name="error_tag_name_empty">Name cannot be empty</string>
+
+    <!-- Icon Picker Screen -->
+    <string name="select_icon_title">Select Icon</string>
+    <string name="search_icons_hint">Search icons or tags…</string>
+
+    <!-- Edit Goal Dialog -->
+    <string name="create_goal_title">Create Goal</string>
+    <string name="edit_goal_title">Edit Goal</string>
+    <string name="goal_name_label">Name</string>
+    <string name="target_hours_label">Target Hours</string>
+    <string name="goal_period_label">Period</string>
+    <string name="period_daily">Daily</string>
+    <string name="period_weekly">Weekly</string>
+    <string name="period_daily_format">%1$dh per daily</string>
+    <string name="period_weekly_format">%1$dh per weekly</string>
+
+    <!-- Quick Panel Toggle Dialog -->
+    <string name="quick_panel_add_desc">Add to notification panel and lock screen for quick access?</string>
+    <string name="quick_panel_remove_desc">Remove from notification panel and lock screen?</string>
+    <string name="quick_panel_add_button">Add</string>
+    <string name="quick_panel_remove_button">Remove</string>
+
+    <!-- Notification Service -->
+    <string name="notification_channel_name">Activity Tracker</string>
+    <string name="notification_channel_desc">Quick access to your activities</string>
+
+    <!-- Contrast Suggestion Dialog -->
+    <string name="contrast_dialog_title">Low contrast!</string>
+    <string name="contrast_bg_change_desc">The current text color may not be readable on the new background.</string>
+    <string name="contrast_text_change_desc">The chosen text color is not readable on the current background.</string>
+    <string name="contrast_preview_text">Sample Text Preview</string>
+    <string name="contrast_choose_color_label">Choose a readable color:</string>
+    <string name="contrast_pick_text_manual">Pick text color manually</string>
+    <string name="contrast_pick_bg_manual">Pick background color manually</string>
+    <string name="contrast_keep_anyway">Keep anyway (not recommended)</string>
+    <string name="apply_button">Apply</string>
+
+    <!-- Low Contrast Warning Drawer -->
+    <string name="contrast_drawer_title">Low contrast warning</string>
+    <string name="contrast_drawer_desc">Text may be unreadable with these colors.</string>
+    <string name="contrast_reverting_in">Reverting in %1$ds</string>
+    <string name="revert_button">Revert</string>
+    <string name="keep_changes_button">Keep changes</string>
+    <string name="minimize_button">Minimize</string>
+
+    <!-- Color Picker Screen -->
+    <string name="color_picker_title">Pick Color</string>
+    <string name="color_picker_confirm">Confirm</string>
+    <string name="color_picker_current">Current:</string>
+    <string name="color_picker_new">New:</string>
+    <string name="color_picker_hex_label">HEX Color</string>
+    <string name="color_picker_hex_error">Invalid hex color. Use format: #RRGGBB</string>
+    <string name="info_desc">Info</string>
+
+    <!-- Long Press Activity Row -->
+    <string name="started_at_format">Started at %1$s</string>
+
+    <!-- Icon Categories -->
+    <string name="category_general">General</string>
+    <string name="category_activities">Activities</string>
+    <string name="category_work_study">Work &amp; Study</string>
+    <string name="category_nature">Nature</string>
+    <string name="category_food_drinks">Food &amp; Drinks</string>
+    <string name="category_symbols">More Symbols</string>
+
+    <!-- General / Navigation -->
+    <string name="back_button">Back</string>
+
+    <string name="yes_confirm">Yes</string>
+    <!-- Licenses Screen -->
+    <string name="license_material_icons">Material Icons (Google)</string>
+    <string name="license_apache_title">Apache License 2.0</string>
+    <string name="license_apache_header">Apache License\nVersion 2.0, January 2004\nhttp://www.apache.org/licenses/</string>
+    <string name="license_apache_text">
+        TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n\n
+        1. Definitions.\n
+        \"License\" shall mean the terms and conditions for use, reproduction, and distribution as defined by Sections 1 through 9 of this document.\n
+        \"Licensor\" shall mean the copyright owner or entity authorized by the copyright owner that is granting the License.\n
+        ...\n\n
+        (Full text of Apache 2.0 License shortened for brevity in this UI,\n
+        but available at http://www.apache.org/licenses/LICENSE-2.0)\n\n
+        Copyright 2024 Google LLC\n\n
+        Licensed under the Apache License, Version 2.0 (the \"License\");\n
+        you may not use this file except in compliance with the License.\n
+        You may obtain a copy of the License at\n\n
+            http://www.apache.org/licenses/LICENSE-2.0\n\n
+        Unless required by applicable law or agreed to in writing, software\n
+        distributed under the License is distributed on an \"AS IS\" BASIS,\n
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n
+        See the License for the specific language governing permissions and\n
+        limitations under the License.
+    </string>
 </resources>
