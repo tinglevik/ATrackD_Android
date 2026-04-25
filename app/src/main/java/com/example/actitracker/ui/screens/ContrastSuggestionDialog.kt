@@ -27,13 +27,13 @@ fun ContrastSuggestionDialog(
     suggestions: List<Pair<String, Color>>,
     onSuggestionSelected: (Color) -> Unit,
     onOpenColorPicker: () -> Unit,
-    onKeepAnyway: () -> Unit, // ✅ Новый callback
+    onKeepAnyway: () -> Unit, // ✅ New callback
     onDismiss: () -> Unit
 ) {
     var selectedColor by remember { mutableStateOf(suggestions.firstOrNull()?.second) }
 
     AlertDialog(
-        onDismissRequest = { /* Нельзя закрыть без выбора */ },
+        onDismissRequest = { /* Cannot be dismissed without a choice */ },
         title = {
             Text(
                 stringResource(R.string.contrast_dialog_title),
@@ -50,7 +50,7 @@ fun ContrastSuggestionDialog(
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
 
-                // Превью
+                // Preview
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -76,7 +76,7 @@ fun ContrastSuggestionDialog(
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
 
-                // Варианты цветов
+                // Color options
                 suggestions.forEach { (name, color) ->
                     Row(
                         modifier = Modifier
@@ -109,7 +109,7 @@ fun ContrastSuggestionDialog(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Кнопка "выбрать вручную"
+                // "Pick manually" button
                 OutlinedButton(
                     onClick = onOpenColorPicker,
                     modifier = Modifier.fillMaxWidth()
@@ -122,14 +122,14 @@ fun ContrastSuggestionDialog(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // ✅ Кнопка "оставить как есть"
+                // ✅ "Keep anyway" button
                 TextButton(
                     onClick = onKeepAnyway,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
                         stringResource(R.string.contrast_keep_anyway),
-                        color = Color(0xFFB71C1C) // Красный для предупреждения
+                        color = Color(0xFFB71C1C) // Red for warning
                     )
                 }
             }

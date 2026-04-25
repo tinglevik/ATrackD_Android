@@ -28,8 +28,7 @@ private enum class ColorPickerTarget { BACKGROUND, TEXT }
 fun SettingsScreen(
     settingsViewModel: SettingsViewModel,
     onNavigateToLicenses: () -> Unit,
-    contentColor: Color = Color.Black,
-    backgroundColor: Color = MaterialTheme.colorScheme.background
+    contentColor: Color = Color.Black
 ) {
     val backgroundColorState by settingsViewModel.backgroundColor.collectAsState()
     val savedContentColor by settingsViewModel.contentColor.collectAsState()

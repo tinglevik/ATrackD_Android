@@ -1,10 +1,19 @@
 package com.example.actitracker.ui.screens
 
 import android.content.Context
-import android.graphics.Color as AndroidColor
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -12,26 +21,28 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Label
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.sp
-import com.example.actitracker.ui.theme.actitrackerTheme
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.graphics.toColor
 import com.example.actitracker.R
-import com.example.actitracker.ui.components.ActivityRowDimens
 import com.example.actitracker.ui.components.ReportScreenDimens
 import com.example.actitracker.ui.components.verticalScrollbar
+import com.example.actitracker.ui.theme.ActitrackerTheme
 import com.example.actitracker.viewmodel.ReportMode
 import com.example.actitracker.viewmodel.ReportStats
 import com.example.actitracker.viewmodel.ReportViewModel
@@ -39,9 +50,8 @@ import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
-import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Locale
+import android.graphics.Color as AndroidColor
 
 @Composable
 fun ReportScreen(
@@ -130,12 +140,11 @@ fun ReportScreenContent(
                 )
         ) {
             if (period == ReportPeriod.TODAY) {
-                val dateText = remember(dateOffset) {
+                val locale = LocalConfiguration.current.locales[0]
+                val dateText = remember(dateOffset, locale) {
                     val cal = Calendar.getInstance()
                     cal.add(Calendar.DAY_OF_YEAR, dateOffset)
-                    SimpleDateFormat(
-                        "d MMMM yyyy",
-                        Locale.getDefault()).format(cal.time)
+                    java.text.DateFormat.getDateInstance(java.text.DateFormat.LONG, locale).format(cal.time)
                 }
                 Text(
                     text = dateText,
@@ -153,8 +162,8 @@ fun ReportScreenContent(
                 Box(
                     modifier = Modifier
                         .padding(ReportScreenDimens.paddingGeneral)
-                        .size(36.dp) // или размер иконки
-                 .clickable { onPreviousDay() }
+                        .size(36.dp) // or icon size
+                        .clickable { onPreviousDay() }
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.ic_chevron_left_circle),
@@ -165,7 +174,7 @@ fun ReportScreenContent(
 
                 Box(
                     modifier = Modifier
-                        .size(36.dp) // или размер иконки
+                        .size(36.dp) // or icon size
                         .clickable { onNextDay() }
                 ) {
                     Icon(
@@ -248,7 +257,7 @@ fun ReportScreenContent(
                             ),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Вертикальная неширокая полоска цвета
+                        // Vertical narrow color strip
                         Box(
                             modifier = Modifier
                                 .width(4.dp)
@@ -296,7 +305,7 @@ fun ReportPieChart(
     val contentColorArgbLighted = remember(contentColor) {
         val hsl = FloatArray(3)
         androidx.core.graphics.ColorUtils.colorToHSL(contentColor.toArgb(), hsl)
-        hsl[2] = (hsl[2] + 0.7f).coerceAtMost(1f) // увеличиваем lightness
+        hsl[2] = (hsl[2] + 0.7f).coerceAtMost(1f) // increase lightness
         androidx.core.graphics.ColorUtils.HSLToColor(hsl)
     }
     val backgroundColorArgb = remember(backgroundColor) { backgroundColor.toArgb() }
@@ -394,7 +403,7 @@ private fun formatTime(seconds: Long): String {
 @Preview(showBackground = true)
 @Composable
 fun ReportScreenPreview() {
-    actitrackerTheme {
+    ActitrackerTheme {
         ReportScreenContent(
             period = ReportPeriod.TODAY,
             reportStats = SampleReportStats,
@@ -407,7 +416,7 @@ fun ReportScreenPreview() {
 @Preview(showBackground = true)
 @Composable
 fun ReportPieChartPreview() {
-    actitrackerTheme {
+    ActitrackerTheme {
         ReportPieChart(
             reportStats = SampleReportStats,
             mode = ReportMode.ACTIVITIES

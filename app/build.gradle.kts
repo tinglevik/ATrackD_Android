@@ -97,7 +97,7 @@ dependencies {
     ksp(libs.room.compiler)
 
     // -----------------------------
-    // DataStore (для настроек и состояния таймера)
+    // DataStore (for settings and timer state)
     // -----------------------------
     implementation(libs.datastore.preferences)
 

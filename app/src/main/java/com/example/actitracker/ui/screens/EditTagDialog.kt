@@ -3,13 +3,33 @@ package com.example.actitracker.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.focusable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -20,7 +40,6 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.actitracker.R
@@ -39,54 +58,64 @@ fun EditTagDialog(
     var name by remember { mutableStateOf(tag.name) }
     var selectedColor by remember { mutableStateOf(tag.color) }
     var isError by remember { mutableStateOf(false) }
-    
-    // Состояние для отображения окна выбора цвета
+
     var showColorPicker by remember { mutableStateOf(false) }
 
-    val dummyFocusRequester = remember { FocusRequester() }
+    val focusRequester = remember { FocusRequester() }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = dialogBackgroundColor,
         titleContentColor = dialogContentColor,
         textContentColor = dialogContentColor,
-        title = { Text(if (isCreating) stringResource(R.string.create_tag_title) else stringResource(R.string.edit_tag_title)) },
+        title = {
+            Text(
+                if (isCreating) stringResource(R.string.create_tag_title) else stringResource(
+                    R.string.edit_tag_title
+                )
+            )
+        },
         text = {
             Column {
-                Box(
-                    modifier = Modifier
-                        .size(0.dp)
-                        .focusRequester(dummyFocusRequester)
-                        .focusable()
-                )
-
                 OutlinedTextField(
                     value = name,
                     onValueChange = {
                         name = it
                         isError = false
                     },
-                    label = { Text(stringResource(R.string.tag_name_label), color = dialogContentColor.copy(alpha = 0.7f)) },
+                    label = {
+                        Text(
+                            stringResource(R.string.tag_name_label),
+                            color = if (isError) MaterialTheme.colorScheme.error else dialogContentColor.copy(alpha = 0.7f)
+                        )
+                    },
                     isError = isError,
+                    supportingText = {
+                        if (isError) {
+                            Text(stringResource(R.string.error_tag_name_empty))
+                        }
+                    },
                     singleLine = true,
                     maxLines = 1,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedTextColor = dialogContentColor,
                         unfocusedTextColor = dialogContentColor,
                         focusedBorderColor = dialogContentColor,
                         unfocusedBorderColor = dialogContentColor.copy(alpha = 0.5f),
+                        errorBorderColor = MaterialTheme.colorScheme.error,
+                        errorLabelColor = MaterialTheme.colorScheme.error,
+                        errorSupportingTextColor = MaterialTheme.colorScheme.error,
                         cursorColor = dialogContentColor
                     )
                 )
-                if (isError) {
-                    Text(stringResource(R.string.error_tag_name_empty), color = Color.Red, modifier = Modifier.padding(top = 4.dp))
-                }
-                
+
                 Spacer(modifier = Modifier.height(16.dp))
-                
-                // Кнопка выбора цвета
+
+                // Color selection button
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -109,10 +138,11 @@ fun EditTagDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    if (name.isBlank()) {
+                    val trimmedName = name.trim()
+                    if (trimmedName.isEmpty()) {
                         isError = true
                     } else {
-                        onSave(tag.copy(name = name.trim(), color = selectedColor))
+                        onSave(tag.copy(name = trimmedName, color = selectedColor))
                     }
                 },
                 shape = RectangleShape,
@@ -124,12 +154,18 @@ fun EditTagDialog(
         },
         dismissButton = {
             Row {
-                TextButton(onClick = onDismiss, colors = ButtonDefaults.textButtonColors(contentColor = dialogContentColor)) {
+                TextButton(
+                    onClick = onDismiss,
+                    colors = ButtonDefaults.textButtonColors(contentColor = dialogContentColor)
+                ) {
                     Text(stringResource(R.string.cancel_button))
                 }
                 if (!isCreating) {
                     Spacer(modifier = Modifier.width(8.dp))
-                    TextButton(onClick = onDelete, colors = ButtonDefaults.textButtonColors(contentColor = Color.Red)) {
+                    TextButton(
+                        onClick = onDelete,
+                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                    ) {
                         Text(stringResource(R.string.delete_button))
                     }
                 }
@@ -137,7 +173,6 @@ fun EditTagDialog(
         }
     )
 
-    // Окно выбора цвета (ColorPickerScreen) поверх текущего диалога
     if (showColorPicker) {
         Dialog(
             onDismissRequest = { showColorPicker = false },
@@ -149,7 +184,7 @@ fun EditTagDialog(
             Box(
                 modifier = Modifier
                     .fillMaxWidth(0.9f)
-                    // Убрано жесткое ограничение высоты
+                    // Removed hard height constraint
                     .clip(RoundedCornerShape(16.dp))
             ) {
                 ColorPickerScreen(
@@ -165,6 +200,6 @@ fun EditTagDialog(
     }
 
     LaunchedEffect(Unit) {
-        dummyFocusRequester.requestFocus()
+        focusRequester.requestFocus()
     }
 }

@@ -1,47 +1,47 @@
-# actitracker
+# ActiTracker
 
-<p align="center">
-  <b>Простой и удобный трекер времени, который позволяет наглядно оценивать картину повседневных активностей.</b>
-</p>
+<div style="text-align: center;">
+  <b>A simple and convenient time tracker that allows you to visually evaluate your daily activities.</b>
+</div>
 
-<p align="center">
-  <img src="screenshots/scr_home_active.png" width="250">
-  <img src="screenshots/scr_report_activities.png" width="250">
-  <img src="screenshots/scr_notification_in_block.png" width="250">
-</p>
+<div style="text-align: center;">
+  <img src="screenshots/scr_home_active.png" width="250" alt="Home screen showing active timer">
+  <img src="screenshots/scr_report_activities.png" width="250" alt="Statistics and reports screen">
+  <img src="screenshots/scr_notification_in_block.png" width="250" alt="Active activity in notification panel">
+</div>
 
 ---
 
-## 🎯 О проекте
-**actitracker** - это бесплатный аналог приложений такого типа, которых уже немало имеется на маркет-плейсах. Такие приложения созданы для тех, кто хочет отслеживать то, чем занимается за день, кому важно подобрать структуру дня и, возможно, всей жизни. И если данное приложение поможет вам в этом, я буду очень рад!
+## 🎯 About the Project
+**actitracker** is a free alternative to similar apps already available on marketplaces. Such apps are designed for those who want to track what they do during the day, and for whom it is important to find a structure for their day and, possibly, their whole life. If this app helps you with that, I'll be very glad!
 
-## 🚀 Быстрый старт
-1. создайте активности
-2. сгруппируйте их по тэгам
-3. добавьте некоторые из активностей в панель уведомлений для включения или любого места, включая состояние блокировки
-4. включайте и выключайте таймеры активностей
-5. в конце дня, недели, месяца, года анализируйте затраченное время на активности и их категории на специальном круговом графике
+## 🚀 Quick Start
+1. Create activities
+2. Group them by tags
+3. Add some of the activities to the notification panel for access from anywhere, including the lock screen
+4. Turn activity timers on and off
+5. At the end of the day, week, month, or year, analyze the time spent on activities and their categories on a special pie chart
 
-## ✨ Основные возможности
-- Учёт времени по активностям
-- Группировка через теги
-- Отчёты по дням / неделям / месяцам
-- Быстрый доступ через панель уведомлений
-- Настройка внешнего вида
+## ✨ Key Features
+- Time tracking by activities
+- Grouping via tags
+- Reports by days / weeks / months
+- Quick access through the notification panel
+- Appearance customization
 
-## 📚 Документация
-Подробная инструкция по использованию приложения:  
-[Открыть руководство пользователя](docs/USER_GUIDE.md)
+## 📚 Documentation
+Detailed instructions for using the application:  
+[Open User Guide](docs/USER_GUIDE.md)
 
-### 📦 7. Установка
-1. Скачайте APK-файл:
-[Скачать APK](https://github.com/tinglevik/actitracker_Android/releases/latest/app-release.apk)
-2. Откройте файл на устройстве
-3. При необходимости разрешите установку из неизвестных источников
-4. Подтвердите установку
+### 📦 7. Installation
+1. Download the APK file:
+[Download APK](https://github.com/tinglevik/actitracker_Android/releases/latest/app-release.apk)
+2. Open the file on your device
+3. If necessary, allow installation from unknown sources
+4. Confirm installation
 ---
 
-## 🛠 Технический стек
+## 🛠 Technical Stack
 *   **Language:** Kotlin
 *   **UI Framework:** Jetpack Compose
 *   **Database:** Room

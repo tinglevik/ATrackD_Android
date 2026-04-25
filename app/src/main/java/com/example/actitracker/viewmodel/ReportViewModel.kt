@@ -3,6 +3,7 @@ package com.example.actitracker.viewmodel
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.actitracker.data.ActivityLogEntity
 import com.example.actitracker.data.model.ActivityItem
 import com.example.actitracker.data.model.TagItem
 import com.example.actitracker.data.repository.ActivityRepository
@@ -21,9 +22,16 @@ data class ReportStats(
     val totalSeconds: Long
 )
 
+// Helper class for storing "static" report data
+private data class BaseReportData(
+    val activities: List<ActivityItem>,
+    val tags: List<TagItem>,
+    val sessions: List<ActivityLogEntity>
+)
+
 class ReportViewModel(
-    private val activitiesFlow: StateFlow<List<ActivityItem>>,
-    private val tagsFlow: StateFlow<List<TagItem>>,
+    activitiesFlow: StateFlow<List<ActivityItem>>,
+    tagsFlow: StateFlow<List<TagItem>>,
     private val activeActivityIdFlow: StateFlow<Long?>,
     private val activeStartTimeFlow: StateFlow<Long?>,
     private val repository: ActivityRepository
@@ -42,34 +50,50 @@ class ReportViewModel(
     val statsData: StateFlow<ReportStats> = _statsData
 
     private val _ticker = MutableStateFlow(System.currentTimeMillis())
-    val ticker: StateFlow<Long> = _ticker
 
     init {
         viewModelScope.launch {
             tickerFlow(1000).collect { _ticker.value = it }
         }
 
+        // Load data from the DB only when the period, offset, or activity list changes
+        val baseDataFlow = combine(
+            activitiesFlow,
+            tagsFlow,
+            _selectedPeriod,
+            _dateOffset
+        ) { activities, tags, period, offset ->
+            val (from, to) = getDateRange(period, System.currentTimeMillis(), offset)
+            val sessions = repository.getAllSessionsForPeriod(from, to)
+            BaseReportData(activities, tags, sessions)
+        }
+
         viewModelScope.launch {
+            // Combine 7 flows. Using 'args' array since there's no overload for 7 flows.
             combine(
-                activitiesFlow,
-                tagsFlow,
-                _selectedPeriod,
-                _dateOffset,
+                baseDataFlow,
                 activeActivityIdFlow,
                 activeStartTimeFlow,
                 _ticker,
-                _reportMode
+                _reportMode,
+                _selectedPeriod,
+                _dateOffset
             ) { args ->
-                val activities = args[0] as List<ActivityItem>
-                val allTags = args[1] as List<TagItem>
-                val period = args[2] as ReportPeriod
-                val offset = args[3] as Int
-                val activeId = args[4] as Long?
-                val activeTime = args[5] as Long?
-                val currentTime = args[6] as Long
-                val mode = args[7] as ReportMode
+                val base = args[0] as BaseReportData
+                val activeId = args[1] as Long?
+                val activeTime = args[2] as Long?
+                val currentTime = args[3] as Long
+                val mode = args[4] as ReportMode
+                val period = args[5] as ReportPeriod
+                val offset = args[6] as Int
 
-                computeStats(activities, allTags, period, offset, activeId, activeTime, currentTime, mode)
+                val (from, to) = getDateRange(period, currentTime, offset)
+                
+                computeStatsSync(
+                    base.activities, base.tags, base.sessions, 
+                    from, to,
+                    activeId, activeTime, currentTime, mode
+                )
             }.collect { result ->
                 _statsData.value = result
             }
@@ -88,24 +112,26 @@ class ReportViewModel(
     fun nextDay() { _dateOffset.value += 1 }
     fun previousDay() { _dateOffset.value -= 1 }
 
-    private suspend fun computeStats(
+    private fun computeStatsSync(
         activities: List<ActivityItem>,
         allTags: List<TagItem>,
-        period: ReportPeriod,
-        offset: Int,
+        allSessions: List<ActivityLogEntity>,
+        from: Long,
+        to: Long,
         activeActivityId: Long?,
         activeStartTime: Long?,
         currentTime: Long,
         mode: ReportMode
     ): ReportStats {
-        val (from, to) = getDateRange(period, currentTime, offset)
         val data = mutableMapOf<String, Long>()
         val colors = mutableMapOf<String, Color>()
         var totalTrackedSeconds = 0L
 
+        val sessionsByActivity = allSessions.groupBy { it.activityId }
+
         if (mode == ReportMode.ACTIVITIES) {
             for (activity in activities) {
-                val sessions = repository.getSessionsForPeriod(activity.id, from, to)
+                val sessions = sessionsByActivity[activity.id] ?: emptyList()
                 var activitySeconds = sessions.sumOf { session ->
                     val endTime = session.endTime ?: return@sumOf 0L
                     (endTime - session.startTime) / 1000
@@ -123,12 +149,11 @@ class ReportViewModel(
                 }
             }
         } else {
-            // Mode: TAGS
             val tagStats = mutableMapOf<String, Long>()
             var noTagSeconds = 0L
 
             for (activity in activities) {
-                val sessions = repository.getSessionsForPeriod(activity.id, from, to)
+                val sessions = sessionsByActivity[activity.id] ?: emptyList()
                 var activitySeconds = sessions.sumOf { session ->
                     val endTime = session.endTime ?: return@sumOf 0L
                     (endTime - session.startTime) / 1000

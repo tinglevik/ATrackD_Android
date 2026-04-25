@@ -72,27 +72,27 @@ object ContrastUtils {
     }
 
     /**
-     * Вычисляет lightness в HSL, при котором luminance даёт нужный контраст
-     * с заданным фоновым luminance. Возвращает null, если невозможно.
+     * Calculates the lightness in HSL at which the luminance provides the required contrast
+     * with the given background luminance. Returns null if impossible.
      *
-     * Формула: target_lum = ratio * (bgLum + 0.05) - 0.05
-     *          или        = (bgLum + 0.05) / ratio - 0.05
-     * Затем обращаем sRGB-linearization, чтобы получить channel → lightness.
+     * Formula: target_lum = ratio * (bgLum + 0.05) - 0.05
+     *          or         = (bgLum + 0.05) / ratio - 0.05
+     * Then we reverse sRGB linearization to get channel -> lightness.
      */
     private fun luminanceForContrast(bgLuminance: Double, ratio: Double, dark: Boolean): Double? {
         val targetLum = if (dark) {
-            // текст темнее фона
+            // text is darker than background
             (bgLuminance + 0.05) / ratio - 0.05
         } else {
-            // текст светлее фона
+            // text is lighter than background
             ratio * (bgLuminance + 0.05) - 0.05
         }
         return if (targetLum in 0.0..1.0) targetLum else null
     }
 
     /**
-     * Приближённо переводит relative luminance в HSL-lightness.
-     * Используем численный поиск, т.к. аналитическая формула сложная.
+     * Approximately converts relative luminance to HSL lightness.
+     * We use a numerical search since the analytical formula is complex.
      */
     private fun luminanceToLightness(targetLuminance: Double, hue: Float, sat: Float): Float {
         var lo = 0f; var hi = 1f
@@ -107,8 +107,8 @@ object ContrastUtils {
     // ── Public API ────────────────────────────────────────────────────────
 
     /**
-     * Генерирует до 4 контрастных вариантов цвета текста для данного фона.
-     * Все варианты вычисляются математически, а не берутся из хардкод-списка.
+     * Generates up to 4 contrasting text color options for a given background.
+     * All options are calculated mathematically, rather than taken from a hardcoded list.
      */
     fun suggestTextColors(background: Color): List<Pair<String, Color>> {
         val bgLum = relativeLuminance(background)
@@ -118,27 +118,27 @@ object ContrastUtils {
 
         val results = mutableListOf<Pair<String, Color>>()
 
-        // 1. Нейтральный (ахроматический): чёрный или белый — математически гарантирован
+        // 1. Neutral (achromatic): black or white — mathematically guaranteed
         if (bgLum > 0.5) {
             results += "Dark neutral" to computeNeutralColor(bgLum, dark = true)
         } else {
             results += "Light neutral" to computeNeutralColor(bgLum, dark = false)
         }
 
-        // 2. Тот же оттенок (hue), но скорректированная яркость
+        // 2. Same hue, but adjusted brightness
         val sameHueColor = computeColorWithHue(hue, sat.coerceAtLeast(0.3f), bgLum)
         if (sameHueColor != null && isReadable(sameHueColor, background)) {
             results += "Same hue" to sameHueColor
         }
 
-        // 3. Противоположный оттенок (complementary, +180°)
+        // 3. Opposite hue (complementary, +180°)
         val compHue = (hue + 180f) % 360f
         val compColor = computeColorWithHue(compHue, 0.6f, bgLum)
         if (compColor != null && isReadable(compColor, background)) {
             results += "Complementary" to compColor
         }
 
-        // 4. Аналогичный оттенок (+60°)
+        // 4. Analogous hue (+60°)
         val analogHue = (hue + 60f) % 360f
         val analogColor = computeColorWithHue(analogHue, 0.5f, bgLum)
         if (analogColor != null && isReadable(analogColor, background)) {
@@ -146,7 +146,7 @@ object ContrastUtils {
         }
 
         return results.distinctBy {
-            // Убираем дубликаты по близости цветов
+            // Remove duplicates based on color proximity
             (it.second.red * 10).toInt() * 1000 +
                     (it.second.green * 10).toInt() * 100 +
                     (it.second.blue * 10).toInt()
@@ -154,10 +154,10 @@ object ContrastUtils {
     }
 
     /**
-     * Генерирует контрастные варианты фона для данного цвета текста.
+     * Generates contrasting background options for a given text color.
      */
     fun suggestBackgroundColors(text: Color): List<Pair<String, Color>> {
-        // Логика симметрична: ищем фон, контрастный к тексту
+        // The logic is symmetric: looking for a background contrasting with the text
         val textLum = relativeLuminance(text)
         val textHsl = toHsl(text)
         val hue = textHsl[0]
@@ -165,14 +165,14 @@ object ContrastUtils {
 
         val results = mutableListOf<Pair<String, Color>>()
 
-        // 1. Нейтральный
+        // 1. Neutral
         if (textLum > 0.5) {
             results += "Dark neutral" to computeNeutralColor(textLum, dark = true)
         } else {
             results += "Light neutral" to computeNeutralColor(textLum, dark = false)
         }
 
-        // 2. Тот же оттенок
+        // 2. Same hue
         val sameHue = computeColorWithHue(hue, sat.coerceAtLeast(0.2f), textLum)
         if (sameHue != null && isReadable(text, sameHue)) {
             results += "Same hue" to sameHue
@@ -202,21 +202,21 @@ object ContrastUtils {
     // ── Private helpers ───────────────────────────────────────────────────
 
     /**
-     * Вычисляет нейтральный (серый) цвет, контрастный к bgLum.
+     * Calculates a neutral (gray) color contrasting with bgLum.
      */
     private fun computeNeutralColor(bgLum: Double, dark: Boolean): Color {
         val targetLum = luminanceForContrast(bgLum, MIN_CONTRAST_RATIO, dark)
             ?: if (dark) 0.0 else 1.0
-        // Для нейтрального hue=0, sat=0 → lightness ≈ sqrt(targetLum) через sRGB
+        // For neutral hue=0, sat=0 -> lightness ≈ sqrt(targetLum) via sRGB
         val lightness = luminanceToLightness(targetLum, 0f, 0f)
         return fromHsl(0f, 0f, lightness)
     }
 
     /**
-     * Вычисляет цвет с нужным hue и saturation, скорректированный по яркости.
+     * Calculates a color with the desired hue and saturation, adjusted for brightness.
      */
     private fun computeColorWithHue(hue: Float, sat: Float, bgLum: Double): Color? {
-        // Определяем, нужен тёмный или светлый цвет
+        // Determine whether a dark or light color is needed
         val needDark = bgLum > 0.5
 
         val targetLum = luminanceForContrast(bgLum, MIN_CONTRAST_RATIO, needDark)
@@ -225,7 +225,7 @@ object ContrastUtils {
         val lightness = luminanceToLightness(targetLum, hue, sat)
         val candidate = fromHsl(hue, sat, lightness)
 
-        // Финальная проверка
+        // Final check
         return if (isReadable(candidate, Color(
                 android.graphics.Color.HSVToColor(
                     floatArrayOf(0f, 0f, bgLum.toFloat())

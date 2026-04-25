@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.graphics.Color
 import android.os.Build
 import android.os.IBinder
@@ -54,7 +55,17 @@ class ActivityTrackerService : Service() {
         notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
         createNotificationChannel()
-        startForeground(NOTIFICATION_ID, buildSimpleNotification())
+        
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            startForeground(
+                NOTIFICATION_ID, 
+                buildSimpleNotification(),
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
+            )
+        } else {
+            startForeground(NOTIFICATION_ID, buildSimpleNotification())
+        }
+
         observeState()
     }
 
@@ -135,8 +146,12 @@ class ActivityTrackerService : Service() {
     }
 
     private fun handleStop(activityId: Long) {
-        serviceScope.launch {
-            app.repository.closeAllActiveSessions()
+        serviceScope.launch(Dispatchers.IO) {
+            try {
+                app.repository.stopActivitySession(activityId)
+            } catch (e: Exception) {
+                android.util.Log.e("ActivityTrackerService", "Error stopping activity $activityId", e)
+            }
         }
     }
 
@@ -196,7 +211,7 @@ class ActivityTrackerService : Service() {
             val isActive = activity.id == activeActivityId
             val itemView = RemoteViews(packageName, R.layout.notification_activity_item)
 
-            // Используем Emoji из маппера для гарантированной видимости
+            // Use Emoji from mapper for guaranteed visibility
             itemView.setTextViewText(R.id.activity_icon, IconMapper.getEmoji(activity.icon))
             
             itemView.setTextViewText(R.id.activity_name, activity.name)

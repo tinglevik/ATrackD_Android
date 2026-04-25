@@ -15,7 +15,7 @@ class ActivityActionReceiver : BroadcastReceiver() {
     }
 
     override fun onReceive(context: Context, intent: Intent) {
-        // ✅ ДОБАВЛЕНО: логирование для диагностики
+        // ✅ ADDED: logging for diagnostics
         android.util.Log.d(
             "ActivityActionReceiver",
             "onReceive: action=${intent.action}, " +
@@ -29,7 +29,7 @@ class ActivityActionReceiver : BroadcastReceiver() {
 
             if (activityId != -1L) {
                 val serviceIntent = Intent(context, ActivityTrackerService::class.java).apply {
-                    // ✅ ИСПРАВЛЕНО: если активна — останавливаем, если нет — запускаем
+                    // ✅ FIXED: if active - stop, if not - start
                     action = if (isActive) ActivityTrackerService.ACTION_STOP
                     else ActivityTrackerService.ACTION_START
                     putExtra(ActivityTrackerService.EXTRA_ACTIVITY_ID, activityId)

@@ -84,6 +84,9 @@ interface ActivityDao {
     @Update
     suspend fun updateSession(session: ActivityLogEntity)
 
+    @Query("SELECT * FROM activity_log WHERE startTime >= :from AND startTime <= :to")
+    suspend fun getAllSessionsInInterval(from: Long, to: Long): List<ActivityLogEntity>
+
     @Query("""
         SELECT activityId, DATE(startTime / 1000, 'unixepoch') as day,
         SUM(COALESCE(endTime, :now) - startTime) as duration

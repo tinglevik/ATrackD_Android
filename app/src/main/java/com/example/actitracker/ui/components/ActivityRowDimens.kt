@@ -3,12 +3,12 @@ package com.example.actitracker.ui.components
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-// internal — доступен внутри модуля, не виден снаружи
+// internal — accessible within the module, not visible from outside
 internal object ActivityRowDimens {
     val minRowHeight = 48.dp
-    val dotSize = 4.dp // Должно совпадать с @dimen/activity_dot_size
+    val dotSize = 4.dp // Should match @dimen/activity_dot_size
     val dotSpacing = 4.dp
-    val iconCarouselSpacing = 2.dp // Должно совпадать с @dimen/activity_icon_dot_spacing
+    val iconCarouselSpacing = 2.dp // Should match @dimen/activity_icon_dot_spacing
     val activityWholeRowVerticalPadding = 4.dp
     val activityWholeRowHorizontalPadding = 16.dp
     val headerFontSize = 16.sp
@@ -17,6 +17,5 @@ internal object ActivityRowDimens {
     val activityRowHorizontalSpacerSize = 12.dp
     val currentTaskPadding = 8.dp
     val currentTaskBorder = 1.dp
-    val touchTargetSize = 48.dp;
-    val timerFontSize = 16.sp
+    val touchTargetSize = 48.dp
 }

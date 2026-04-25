@@ -42,8 +42,8 @@ class ActiTrackerApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        // Наблюдаем за списком активностей для быстрой панели.
-        // Если сервис остановлен, но в списке что-то появилось — запускаем его.
+        // Observe the list of activities for the quick panel.
+        // If the service is stopped but something appears in the list — start it.
         applicationScope.launch {
             repository.getQuickPanelActivities().collect { activities ->
                 if (activities.isNotEmpty()) {

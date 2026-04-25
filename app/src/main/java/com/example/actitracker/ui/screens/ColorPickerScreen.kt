@@ -32,16 +32,16 @@ import com.example.actitracker.R
 import com.example.actitracker.ui.components.HueBar
 import com.example.actitracker.ui.components.SaturationValuePanel
 
-// Вспомогательная функция: Compose Color → ARGB Int
+// Helper function: Compose Color → ARGB Int
 private fun Color.toArgbInt(): Int = toArgb()
 
-// Вспомогательная функция: Color → HEX строка
+// Helper function: Color → HEX string
 private fun colorToHex(color: Color): String {
     val argb = color.toArgbInt()
     return "#%06X".format(argb and 0xFFFFFF)
 }
 
-// Вспомогательная функция: HEX строка → Color?
+// Helper function: HEX string → Color?
 private fun parseHexColor(hex: String): Color? {
     return try {
         val cleaned = if (hex.startsWith("#")) hex else "#$hex"
@@ -248,7 +248,7 @@ fun ColorPickerScreen(
                 onDone = {
                     keyboardController?.hide()
                     focusManager.clearFocus()
-                    // Переводим фокус на невидимый элемент
+                    // Shift focus to an invisible element
                     dummyFocusRequester.requestFocus()
                     
                     val parsed = parseHexColor(hexInput)

@@ -1,7 +1,10 @@
 package com.example.actitracker.data.repository
 
-import com.example.actitracker.data.*
-import com.example.actitracker.data.dto.ActivityDuration
+import com.example.actitracker.data.ActivityDao
+import com.example.actitracker.data.ActivityEntity
+import com.example.actitracker.data.ActivityLogEntity
+import com.example.actitracker.data.GoalEntity
+import com.example.actitracker.data.TagEntity
 import kotlinx.coroutines.flow.Flow
 
 class ActivityRepository(
@@ -33,17 +36,6 @@ class ActivityRepository(
 
     suspend fun deleteTag(tagId: Long) = dao.deleteTag(tagId)
 
-    suspend fun addTagToActivity(activityId: Long, tagId: Long) {
-        dao.insertActivityTagCrossRef(ActivityTagCrossRef(activityId, tagId))
-    }
-
-    suspend fun removeTagFromActivity(activityId: Long, tagId: Long) {
-        dao.deleteActivityTagCrossRef(activityId, tagId)
-    }
-
-    fun getTagsForActivity(activityId: Long): Flow<List<TagEntity>> = dao.getTagsForActivity(activityId)
-
-    // Goals
     fun getAllGoals(): Flow<List<GoalEntity>> = dao.getAllGoals()
 
     suspend fun insertGoal(goal: GoalEntity): Long = dao.insertGoal(goal)
@@ -52,7 +44,6 @@ class ActivityRepository(
 
     suspend fun deleteGoal(goalId: Long) = dao.deleteGoal(goalId)
 
-    // Sessions
     suspend fun startActivitySession(activityId: Long) {
         val session = ActivityLogEntity(
             activityId = activityId,
@@ -70,21 +61,8 @@ class ActivityRepository(
         }
     }
 
-    suspend fun getTotalTime(activityId: Long): Long {
-        return dao.getSessions(activityId)
-            .sumOf { (it.endTime ?: System.currentTimeMillis()) - it.startTime }
-    }
-
-    suspend fun getActivityReport(from: Long, to: Long): List<ActivityDuration> {
-        return dao.getActivityDurations(from, to)
-    }
-
-    suspend fun getSessionsForPeriod(
-        activityId: Long,
-        from: Long,
-        to: Long
-    ): List<ActivityLogEntity> {
-        return dao.getSessionsForPeriod(activityId, from, to)
+    suspend fun getAllSessionsForPeriod(from: Long, to: Long): List<ActivityLogEntity> {
+        return dao.getAllSessionsInInterval(from, to)
     }
 
     fun getSessionsFromFlow(from: Long): Flow<List<ActivityLogEntity>> {
@@ -95,27 +73,11 @@ class ActivityRepository(
         return dao.getActiveSessionFlow()
     }
 
-    suspend fun getAnyActiveSession(): ActivityLogEntity? {
-        return dao.getAnyActiveSession()
-    }
-
-    suspend fun getAllActiveSessions(): List<ActivityLogEntity> {
-        return dao.getAllActiveSessions()
-    }
-
     suspend fun closeAllActiveSessionsExcept(excludeActivityId: Long) {
         dao.closeAllActiveSessionsExcept(
             excludeActivityId = excludeActivityId,
             endTime = System.currentTimeMillis()
         )
-    }
-
-    suspend fun closeAllActiveSessions() {
-        dao.closeAllActiveSessions(System.currentTimeMillis())
-    }
-
-    suspend fun closeSessionById(sessionId: Long, endTime: Long) {
-        dao.closeSessionById(sessionId, endTime)
     }
 
     fun getQuickPanelActivities(): Flow<List<ActivityEntity>> {

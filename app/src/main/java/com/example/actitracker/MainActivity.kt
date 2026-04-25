@@ -47,8 +47,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -63,6 +61,7 @@ import com.example.actitracker.ui.screens.ManageActivitiesScreen
 import com.example.actitracker.ui.screens.ReportScreen
 import com.example.actitracker.ui.screens.SettingsScreen
 import com.example.actitracker.ui.screens.TodayScreen
+import com.example.actitracker.ui.theme.ActitrackerTheme
 import com.example.actitracker.viewmodel.ReportViewModel
 import com.example.actitracker.viewmodel.ReportViewModelFactory
 import com.example.actitracker.viewmodel.SettingsViewModel
@@ -79,9 +78,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         enableEdgeToEdge()
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        WindowInsetsControllerCompat(window, window.decorView)
-            .isAppearanceLightStatusBars = true
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(
@@ -102,149 +98,150 @@ class MainActivity : ComponentActivity() {
         ContextCompat.startForegroundService(this, serviceIntent)
 
         setContent {
-            val navController = rememberNavController()
+            ActitrackerTheme {
+                val navController = rememberNavController()
 
-            val todayViewModel: TodayViewModel = viewModel(factory = todayFactory)
-            val activities by todayViewModel.activitiesWithStats.collectAsState()
-            val tags by todayViewModel.tags.collectAsState()
-            val goals by todayViewModel.goals.collectAsState()
+                val todayViewModel: TodayViewModel = viewModel(factory = todayFactory)
+                val activities by todayViewModel.activitiesWithStats.collectAsState()
+                val tags by todayViewModel.tags.collectAsState()
+                val goals by todayViewModel.goals.collectAsState()
 
-            val isCreating by todayViewModel.isCreating.collectAsState()
-            val activeActivityId by todayViewModel.activeActivityId.collectAsState()
-            val activeStartTime by todayViewModel.activeStartTime.collectAsState()
+                val isCreating by todayViewModel.isCreating.collectAsState()
+                val activeActivityId by todayViewModel.activeActivityId.collectAsState()
+                val activeStartTime by todayViewModel.activeStartTime.collectAsState()
 
-            val reportViewModel: ReportViewModel = viewModel(
-                factory = ReportViewModelFactory(
-                    todayViewModel.activitiesWithStats,
-                    todayViewModel.tags,
-                    todayViewModel.activeActivityId,
-                    todayViewModel.activeStartTime,
-                    repository
-                )
-            )
-
-            val settingsViewModel: SettingsViewModel = viewModel(factory = settingsFactory)
-            val backgroundColor by settingsViewModel.backgroundColor.collectAsState()
-            val contentColor by settingsViewModel.contentColor.collectAsState()
-            val showWarningDrawer by settingsViewModel.showWarningDrawer.collectAsState()
-            val snackbarMessage by settingsViewModel.snackbarMessage.collectAsState()
-
-            val snackbarHostState = remember { SnackbarHostState() }
-
-            LaunchedEffect(snackbarMessage) {
-                snackbarMessage?.let {
-                    snackbarHostState.showSnackbar(it)
-                    settingsViewModel.clearSnackbar()
-                }
-            }
-
-            Scaffold(
-                bottomBar = { BottomNavBar(navController) },
-                snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
-            ) { innerPadding ->
-                Box(modifier = Modifier.fillMaxSize()) {
-
-                    val statusBarHeight = WindowInsets.statusBars
-                        .asPaddingValues()
-                        .calculateTopPadding()
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(statusBarHeight)
-                            .background(Color(0xE6000000))
+                val reportViewModel: ReportViewModel = viewModel(
+                    factory = ReportViewModelFactory(
+                        todayViewModel.activitiesWithStats,
+                        todayViewModel.tags,
+                        todayViewModel.activeActivityId,
+                        todayViewModel.activeStartTime,
+                        repository
                     )
+                )
 
-                    CompositionLocalProvider(LocalContentColor provides contentColor) {
-                        NavHost(
-                            navController = navController,
-                            startDestination = "today",
+                val settingsViewModel: SettingsViewModel = viewModel(factory = settingsFactory)
+                val backgroundColor by settingsViewModel.backgroundColor.collectAsState()
+                val contentColor by settingsViewModel.contentColor.collectAsState()
+                val showWarningDrawer by settingsViewModel.showWarningDrawer.collectAsState()
+                val snackbarMessage by settingsViewModel.snackbarMessage.collectAsState()
+
+                val snackbarHostState = remember { SnackbarHostState() }
+
+                LaunchedEffect(snackbarMessage) {
+                    snackbarMessage?.let {
+                        snackbarHostState.showSnackbar(it)
+                        settingsViewModel.clearSnackbar()
+                    }
+                }
+
+                Scaffold(
+                    bottomBar = { BottomNavBar(navController) },
+                    snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+                ) { innerPadding ->
+                    Box(modifier = Modifier.fillMaxSize()) {
+
+                        val statusBarHeight = WindowInsets.statusBars
+                            .asPaddingValues()
+                            .calculateTopPadding()
+
+                        Box(
                             modifier = Modifier
-                                .padding(innerPadding)
-                                .background(backgroundColor)
-                        ) {
-                            composable("today") {
-                                val ticker by todayViewModel.ticker.collectAsState()
+                                .fillMaxWidth()
+                                .height(statusBarHeight)
+                                .background(Color(0xE6000000))
+                        )
 
-                                TodayScreen(
-                                    activities = activities,
-                                    activeActivityId = activeActivityId,
-                                    activeStartTime = activeStartTime,
-                                    ticker = ticker,
-                                    onStartActivity = { todayViewModel.startActivity(it) },
-                                    onStopActivity = { todayViewModel.stopActivity(it) },
-                                    onManageClick = {
-                                        navController.navigate("manage") {
-                                            launchSingleTop = true
-                                        }
-                                    },
-                                    onCreateStart = { todayViewModel.startCreating() },
-                                    onCreateDismiss = { todayViewModel.stopCreating() },
-                                    onCreateSave = { todayViewModel.addActivity(it) },
-                                    isCreating = isCreating,
-                                    allTags = tags,
-                                    backgroundColor = backgroundColor,
-                                    contentColor = contentColor,
-                                    onQuickPanelToggle = { todayViewModel.toggleQuickPanel(it) }
-                                )
-                            }
+                        CompositionLocalProvider(LocalContentColor provides contentColor) {
+                            NavHost(
+                                navController = navController,
+                                startDestination = "today",
+                                modifier = Modifier
+                                    .padding(innerPadding)
+                                    .background(backgroundColor)
+                            ) {
+                                composable("today") {
+                                    val ticker by todayViewModel.ticker.collectAsState()
 
-                            composable("manage") {
-                                ManageActivitiesScreen(
-                                    navController = navController,
-                                    activities = activities,
-                                    onActivityCreate = { todayViewModel.addActivity(it) },
-                                    onActivityUpdate = { todayViewModel.updateActivity(it) },
-                                    onActivityDelete = { todayViewModel.deleteActivity(it) },
-                                    tags = tags,
-                                    onTagCreate = { todayViewModel.addTag(it) },
-                                    onTagUpdate = { todayViewModel.updateTag(it) },
-                                    onTagDelete = { todayViewModel.deleteTag(it) },
-                                    goals = goals,
-                                    onGoalCreate = { todayViewModel.addGoal(it) },
-                                    onGoalUpdate = { todayViewModel.updateGoal(it) },
-                                    onGoalDelete = { todayViewModel.deleteGoal(it) },
-                                    backgroundColor = backgroundColor,
-                                    contentColor = contentColor
-                                )
-                            }
+                                    TodayScreen(
+                                        activities = activities,
+                                        activeActivityId = activeActivityId,
+                                        activeStartTime = activeStartTime,
+                                        ticker = ticker,
+                                        onStartActivity = { todayViewModel.startActivity(it) },
+                                        onStopActivity = { todayViewModel.stopActivity(it) },
+                                        onManageClick = {
+                                            navController.navigate("manage") {
+                                                launchSingleTop = true
+                                            }
+                                        },
+                                        onCreateStart = { todayViewModel.startCreating() },
+                                        onCreateDismiss = { todayViewModel.stopCreating() },
+                                        onCreateSave = { todayViewModel.addActivity(it) },
+                                        isCreating = isCreating,
+                                        allTags = tags,
+                                        backgroundColor = backgroundColor,
+                                        contentColor = contentColor,
+                                        onQuickPanelToggle = { todayViewModel.toggleQuickPanel(it) }
+                                    )
+                                }
 
-                            composable("report") {
-                                ReportScreen(
-                                    viewModel = reportViewModel,
-                                    contentColor = contentColor,
-                                    backgroundColor = backgroundColor
-                                )
-                            }
+                                composable("manage") {
+                                    ManageActivitiesScreen(
+                                        navController = navController,
+                                        activities = activities,
+                                        onActivityUpdate = { todayViewModel.updateActivity(it) },
+                                        onActivityCreate = { todayViewModel.addActivity(it) },
+                                        onActivityDelete = { todayViewModel.deleteActivity(it) },
+                                        tags = tags,
+                                        onTagUpdate = { todayViewModel.updateTag(it) },
+                                        onTagCreate = { todayViewModel.addTag(it) },
+                                        onTagDelete = { todayViewModel.deleteTag(it) },
+                                        goals = goals,
+                                        onGoalUpdate = { todayViewModel.updateGoal(it) },
+                                        onGoalCreate = { todayViewModel.addGoal(it) },
+                                        onGoalDelete = { todayViewModel.deleteGoal(it) },
+                                        backgroundColor = backgroundColor,
+                                        contentColor = contentColor
+                                    )
+                                }
 
-                            composable("settings") {
-                                SettingsScreen(
-                                    settingsViewModel = settingsViewModel,
-                                    onNavigateToLicenses = {
-                                        navController.navigate("licenses")
-                                    },
-                                    contentColor = contentColor,
-                                    backgroundColor = backgroundColor
-                                )
-                            }
+                                composable("report") {
+                                    ReportScreen(
+                                        viewModel = reportViewModel,
+                                        contentColor = contentColor,
+                                        backgroundColor = backgroundColor
+                                    )
+                                }
 
-                            composable("licenses") {
-                                LicensesScreen(
-                                    onBack = { navController.popBackStack() },
-                                    backgroundColor = backgroundColor,
-                                    contentColor = contentColor
-                                )
+                                composable("settings") {
+                                    SettingsScreen(
+                                        settingsViewModel = settingsViewModel,
+                                        onNavigateToLicenses = {
+                                            navController.navigate("licenses")
+                                        },
+                                        contentColor = contentColor
+                                    )
+                                }
+
+                                composable("licenses") {
+                                    LicensesScreen(
+                                        onBack = { navController.popBackStack() },
+                                        backgroundColor = backgroundColor,
+                                        contentColor = contentColor
+                                    )
+                                }
                             }
                         }
-                    }
 
-                    if (showWarningDrawer) {
-                        val context = androidx.compose.ui.platform.LocalContext.current
-                        LowContrastWarningDrawer(
-                            onRevert = { settingsViewModel.revertChanges(context) },
-                            onKeep = { settingsViewModel.keepChanges(context) },
-                            onTimeout = { settingsViewModel.revertChanges(context) }
-                        )
+                        if (showWarningDrawer) {
+                            val context = androidx.compose.ui.platform.LocalContext.current
+                            LowContrastWarningDrawer(
+                                onRevert = { settingsViewModel.revertChanges(context) },
+                                onKeep = { settingsViewModel.keepChanges(context) },
+                                onTimeout = { settingsViewModel.revertChanges(context) }
+                            )
+                        }
                     }
                 }
             }

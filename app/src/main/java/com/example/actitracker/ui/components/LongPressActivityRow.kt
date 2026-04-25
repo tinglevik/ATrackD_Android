@@ -21,20 +21,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.SubcomposeLayout
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.res.stringResource
 import com.example.actitracker.R
 import com.example.actitracker.data.model.ActivityItem
-import com.example.actitracker.data.model.TagItem
-import com.example.actitracker.ui.theme.actitrackerTheme
-import java.text.SimpleDateFormat
+import com.example.actitracker.ui.theme.ActitrackerTheme
 import java.util.Date
-import java.util.Locale
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -43,11 +40,20 @@ fun LongPressActivityRow(
     isActive: Boolean,
     currentTime: Long,
     activeStartTime: Long?,
-    allTags: List<TagItem> = emptyList(),
     contentColor: Color = Color.Black,
     onClick: () -> Unit,
     onLongPress: () -> Unit
 ) {
+    val configuration = LocalConfiguration.current
+    val locale = configuration.locales[0]
+
+    val timeFormatter = remember(locale) {
+        android.icu.text.DateFormat.getTimeInstance(
+            android.icu.text.DateFormat.SHORT,
+            locale
+        )
+    }
+
     val liveSeconds = remember(
         activity.elapsedSeconds, isActive, currentTime, activeStartTime
     ) {
@@ -75,7 +81,7 @@ fun LongPressActivityRow(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                // Иконка + карусель
+                // Icon + carousel
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -116,15 +122,12 @@ fun LongPressActivityRow(
                     )
 
                     activity.firstStartDayTime?.let { firstStart ->
+                        val timeStr = remember(firstStart, timeFormatter) {
+                            timeFormatter.format(Date(firstStart))
+                        }
+
                         Text(
-                            text = stringResource(
-                                R.string.started_at_format,
-                                SimpleDateFormat("HH:mm", Locale.getDefault()).format(
-                                    Date(
-                                        firstStart
-                                    )
-                                )
-                            ),
+                            text = stringResource(R.string.started_at_format, timeStr),
                             fontSize = ActivityRowDimens.firstStartDayTimeFontSize,
                             color = contentColor.copy(alpha = 0.7f),
                         )
@@ -164,26 +167,12 @@ fun LongPressActivityRowPreview() {
         tagIds = listOf(1, 2)
     )
 
-    val sampleTags = listOf(
-        TagItem(
-            id = 1,
-            name = "Sport",
-            color = Color(0xFF4CAF50)
-        ),
-        TagItem(
-            id = 2,
-            name = "Health",
-            color = Color(0xFFFF9800)
-        )
-    )
-
-    actitrackerTheme {
+    ActitrackerTheme {
         LongPressActivityRow(
             activity = sampleActivity,
             isActive = true,
             currentTime = System.currentTimeMillis(),
             activeStartTime = System.currentTimeMillis() - 120_000, // +2 min
-            allTags = sampleTags,
             onClick = {},
             onLongPress = {}
         )
@@ -203,13 +192,12 @@ fun LongPressActivityRowInactivePreview() {
         tagIds = emptyList()
     )
 
-    actitrackerTheme {
+    ActitrackerTheme {
         LongPressActivityRow(
             activity = sampleActivity,
             isActive = false,
             currentTime = System.currentTimeMillis(),
             activeStartTime = null,
-            allTags = emptyList(),
             onClick = {},
             onLongPress = {}
         )
@@ -229,13 +217,12 @@ fun LongPressActivityRowNeverStartedPreview() {
         tagIds = emptyList()
     )
 
-    actitrackerTheme {
+    ActitrackerTheme {
         LongPressActivityRow(
             activity = sampleActivity,
             isActive = false,
             currentTime = System.currentTimeMillis(),
             activeStartTime = null,
-            allTags = emptyList(),
             onClick = {},
             onLongPress = {}
         )

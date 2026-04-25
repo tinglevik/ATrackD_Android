@@ -48,12 +48,11 @@ fun EditActivityDialog(
     var selectedIconName by remember { mutableStateOf(activity.icon) }
     var showInQuickPanel by remember { mutableStateOf(activity.showInQuickPanel) }
     var selectedTagIds by remember { mutableStateOf(activity.tagIds) }
-    var isError by remember { mutableStateOf(false) }
     var showTagMenu by remember { mutableStateOf(false) }
 
-    // Состояние для отображения окон выбора
-    var showColorPicker by remember { mutableStateOf(false) }
-    var showIconPicker by remember { mutableStateOf(false) }
+    // State for showing selection dialogs
+    val showColorPicker = remember { mutableStateOf(false) }
+    val showIconPicker = remember { mutableStateOf(false) }
     
     val dummyFocusRequester = remember { FocusRequester() }
 
@@ -79,17 +78,13 @@ fun EditActivityDialog(
 
                 OutlinedTextField(
                     value = name,
-                    onValueChange = {
-                        name = it
-                        isError = false
-                    },
+                    onValueChange = { name = it },
                     label = {
                         Text(
                             stringResource(R.string.activity_name_label),
                             color = dialogContentColor.copy(alpha = 0.7f)
                         )
                     },
-                    isError = isError,
                     singleLine = true,
                     maxLines = 1,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
@@ -105,21 +100,13 @@ fun EditActivityDialog(
                     )
                 )
 
-                if (isError) {
-                    Text(
-                        stringResource(R.string.error_name_empty),
-                        color = Color.Red,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-                }
-
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Кнопка выбора цвета
+                // Color selection button
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { showColorPicker = true }
+                        .clickable { showColorPicker.value = true }
                         .padding(vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -134,11 +121,11 @@ fun EditActivityDialog(
                     )
                 }
 
-                // Кнопка выбора иконки
+                // Icon selection button
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { showIconPicker = true }
+                        .clickable { showIconPicker.value = true }
                         .padding(vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -300,9 +287,7 @@ fun EditActivityDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    if (name.isBlank()) {
-                        isError = true
-                    } else {
+                    if (name.isNotBlank()) {
                         onSave(activity.copy(
                             name = name.trim(),
                             color = selectedColor,
@@ -349,10 +334,10 @@ fun EditActivityDialog(
         }
     )
 
-    // Окно выбора цвета
-    if (showColorPicker) {
+    // Color selection dialog
+    if (showColorPicker.value) {
         Dialog(
-            onDismissRequest = { showColorPicker = false },
+            onDismissRequest = { showColorPicker.value = false },
             properties = DialogProperties(
                 usePlatformDefaultWidth = false,
                 decorFitsSystemWindows = false
@@ -367,18 +352,18 @@ fun EditActivityDialog(
                     initialColor = selectedColor,
                     onColorConfirmed = {
                         selectedColor = it
-                        showColorPicker = false
+                        showColorPicker.value = false
                     },
-                    onDismiss = { showColorPicker = false }
+                    onDismiss = { showColorPicker.value = false }
                 )
             }
         }
     }
 
-    // Окно выбора иконки
-    if (showIconPicker) {
+    // Icon selection dialog
+    if (showIconPicker.value) {
         Dialog(
-            onDismissRequest = { showIconPicker = false },
+            onDismissRequest = { showIconPicker.value = false },
             properties = DialogProperties(
                 usePlatformDefaultWidth = false,
                 decorFitsSystemWindows = false
@@ -395,9 +380,9 @@ fun EditActivityDialog(
                     initialIconName = selectedIconName,
                     onIconSelected = {
                         selectedIconName = it
-                        showIconPicker = false
+                        showIconPicker.value = false
                     },
-                    onDismiss = { showIconPicker = false }
+                    onDismiss = { showIconPicker.value = false }
                 )
             }
         }

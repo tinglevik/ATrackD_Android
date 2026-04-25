@@ -190,6 +190,4 @@ object IconMapper {
     }
 
     fun getAllIcons(): List<IconInfo> = iconList
-
-    fun getCategories(): List<String> = iconList.map { it.category }.distinct()
 }

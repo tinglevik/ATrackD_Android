@@ -7,7 +7,7 @@ data class ActivityItem(
     val name: String,
     val color: Color,
     val icon: String,
-    val elapsedSeconds: Long = 0, // накопленное время
+    val elapsedSeconds: Long = 0, // accumulated time
     val history: Map<String, Long> = emptyMap(), // yyyy-MM-dd -> seconds
     val firstStartDayTime: Long? = null,
     val showInQuickPanel: Boolean = false,

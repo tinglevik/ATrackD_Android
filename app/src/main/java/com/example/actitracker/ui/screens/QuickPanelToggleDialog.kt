@@ -1,16 +1,16 @@
 package com.example.actitracker.ui.screens
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.actitracker.R
 import com.example.actitracker.data.model.ActivityItem
 
@@ -55,7 +55,11 @@ fun QuickPanelToggleDialog(
                     contentColor = dialogBackgroundColor
                 )
             ) {
-                Text(if (newState) stringResource(R.string.quick_panel_add_button) else stringResource(R.string.quick_panel_remove_button))
+                Text(
+                    if (newState) stringResource(R.string.quick_panel_add_button) else stringResource(
+                        R.string.quick_panel_remove_button
+                    )
+                )
             }
         },
         dismissButton = {

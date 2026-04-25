@@ -1,70 +1,70 @@
-# actitracker — Руководство пользователя
+# actitracker — User Guide
 
-### 🚀 1. Создайте список активностей
-Чтобы создать активность, нажмите на кнопку "+" 
+### 🚀 1. Create a List of Activities
+To create an activity, click on the "+" button
 
-| на экране "Сегодня" внизу | или | на экране "Управление" справа вверху |
+| at the bottom of the "Today" screen | or | at the top right of the "Manage" screen |
 | :---: | :---: | :---: |
 |<img src="../screenshots/scr_home_add_button.png" height="300"> | | <img src="../screenshots/scr_manage_activities_add_button.png" height="300"> |
 
-В появившемся окне <img src="../screenshots/scr_home_add.png" height="200"> вы можете настроить:
+In the window that appears <img src="../screenshots/scr_home_add.png" height="200"> you can configure:
 
-| цвет активности | иконку для нее | присвоить ей тег (см. п.2) |
+| activity color | icon for it | assign a tag to it (see point 2) |
 |:---: | :---: | :---: |
 |<img src="../screenshots/scr_home_add_colorpicker.png" height="450"> | <img src="../screenshots/scr_home_add_iconpicker.png" height="450"> | <img src="../screenshots/scr_home_add_tagpicker.png" height="450"> |
 
-После чего вы можете запускать и останавливать активности, нажимая на них на экране "Сегодня", а также в панелях уведомлений в разблокированном и заблокированном состояниях устройства (как добавлять активности в панели уведомлений см. ниже в пункте 5), при этом активности будут выглядеть так:
+After that, you can start and stop activities by clicking on them on the "Today" screen, as well as in the notification panels in both unlocked and locked states of the device (see point 5 below on how to add activities to notification panels). The activities will look like this:
 
-|Не запущена | Активный трекинг |
+| Inactive | Active tracking |
 |:---: | :---: |
 |<img src="../screenshots/scr_home_inactive.png" height="450"> | <img src="../screenshots/scr_home_active.png" height="450"> |
 
-На картинке справа вы можете видеть, что на экране "Сегодня" включенная активность отображается также в специальной строке, где ее тоже можно остановить.
+In the image on the right, you can see that on the "Today" screen, the active activity is also displayed in a special row where it can also be stopped.
 
-### 🏷️ 2. Создайте теги (категории)
-Активности можно группировать по категориям с помощью тегов. Для создания и настройки тегов перейдите с экрана "Сегодня" в раздел Manage, тапнув по соответствующей иконке слева вверху экрана  <img src="../screenshots/scr_home_manage_button.png" height="200">, а затем на экране Manage перейдите во вкладку "Теги":
+### 🏷️ 2. Create Tags (Categories)
+Activities can be grouped into categories using tags. To create and configure tags, navigate from the "Today" screen to the "Manage" section by tapping the corresponding icon at the top left of the screen <img src="../screenshots/scr_home_manage_button.png" height="200">, and then on the "Manage" screen, go to the "Tags" tab:
 
-| Список тегов | Настройки тега |
+| Tag List | Tag Settings |
 |:---: | :---: |
 | <img src="../screenshots/scr_manage_tags.png" height="450"> | <img src="../screenshots/scr_home_add_tagpicker.png" height="450"> |
 
-Кнопка "+" на этой вкладке справа вверху отвечат за создание тега (аналогично созданию активности на соответствующей вкладке). Нажмите на тег в списке тегов (картинка слева), чтобы настроить его (картинка справа). 
+The "+" button on this tab at the top right is responsible for creating a tag (similar to creating an activity on the corresponding tab). Click on a tag in the tag list (left image) to configure it (right image).
 
-### 📊 3. Просматривайте наглядные отчеты
-Перейдите на экран Отчет по иконке в нижней панели. Здесь круговой график (пирог) покажет общую картину ваших активностей за сутки, неделю, месяц или год. Вы можете анализировать свою продуктивность в разрезе активностей и тегов, переключая режим этого графика иконкой в правом верхнем углу от него. А стрелки выше над этой иконкой переключают сутки, за которые формируется отчет.
+### 📊 3. View Visual Reports
+Go to the "Report" screen by clicking the icon in the bottom panel. Here, a pie chart will show the overall picture of your activities for the day, week, month, or year. You can analyze your productivity by activity or tag by switching the chart mode with the icon in its upper right corner. The arrows above that icon switch the day for which the report is generated.
 
-|Отчет по активностям | Отчет по тегам |
+| Report by Activities | Report by Tags |
 |:---: | :---: |
 | <img src="../screenshots/scr_report_activities.png" height="450"> | <img src="../screenshots/scr_report_tags.png" height="450"> |
 
-### ⚡ 4. Настройте быстрый доступ (Quick Panel)
-Вы можете управлять трекингом прямо из панели уведомлений. Для этого добавляйте и удаляйте активности для быстрого запуска, чтобы переключать активности без необходимости открывать приложение или разблокировать устройство. Сделать это можно долгим нажатием на активность на экране "Сегодня" или переключением соответствующей кнопки в окне настройки активностей с экрана "Управление" (см. п.1):
+### ⚡ 4. Configure Quick Access (Quick Panel)
+You can manage tracking directly from the notification panel. To do this, add and remove activities for quick start to switch activities without having to open the app or unlock the device. You can do this by long-pressing an activity on the "Today" screen or by toggling the corresponding button in the activity settings window from the "Manage" screen (see point 1):
 
-|длинное нажатие на экране "Сегодня" | из окна "Управление" |
+| long press on the "Today" screen | from the "Manage" window |
 |:---: | :---: |
 |<img src="../screenshots/scr_notify_pannel_set_add.png" height="450"> <img src="../screenshots/scr_notify_pannel_set_remove.png" height="450"> | <img src="../screenshots/scr_home_add_toggle-pannel.png" height="450"> |
 
-Активности в панелях уведомлений будут выглядеть так:
+Activities in the notification panels will look like this:
 
-|длинное нажатие на экране "Сегодня" | из окна "Управление" |
+| in the notification shade | on the lock screen |
 |:---: | :---: |
 |<img src="../screenshots/scr_notification.png" height="450"> | <img src="../screenshots/scr_notification_in_block.png" height="450"> |
 
-### 🎨 5. Настройки приложения
-Вы можете изменить цвета интерфейса, текста, иконок на свое усмотрение. 
+### 🎨 5. App Settings
+You can change the colors of the interface, text, and icons at your discretion.
 
-| Общие настройки | Настройка цвета |
+| General Settings | Color Settings |
 |:---: | :---: |
 |<img src="../screenshots/scr_settings.png" height="450"> | <img src="../screenshots/scr_settings_bg-text-color-set.png" height="450"> |
 
-Примечание:
-если вдруг вы случайно выберете такие цвета фона и текста, что текст и элементы будут нечитаемы (или трудночитаемы), приложение откатит такие изменения через 30 секунд, если вы явно не согласитесь оставить такие настройки в предупреждении, которое появится справа:
+Note:
+If you accidentally choose background and text colors that make the text and elements unreadable (or hard to read), the app will revert those changes after 30 seconds unless you explicitly agree to keep those settings in the warning that appears on the right:
 
-| Предупреждение свернуто | Предупреждение развернуто |
+| Warning collapsed | Warning expanded |
 |:---: | :---: |
 |<img src="../screenshots/scr_settings_warn-collapsed.png" height="450"> | <img src="../screenshots/scr_settings_warn-expanded.png" height="450"> |
 
-Ожидаются также настройки импорта/экспорта активностей, фонов, своих иконок, настройки режима отображения времени и дат, языков.
+Future updates are expected to include settings for importing/exporting activities, backgrounds, custom icons, time and date display mode settings, and languages.
 
-### 🏆 6. Цели и прогресс
-Функционал этого окна ожидается в будущих обновлениях.
+### 🏆 6. Goals and Progress
+The functionality for this window is expected in future updates.

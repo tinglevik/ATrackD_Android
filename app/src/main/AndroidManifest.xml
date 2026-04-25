@@ -3,18 +3,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:installLocation="auto">
 
-    <!-- tools:ignore убирает предупреждение IDE, не влияет на поведение -->
+    <!-- tools:ignore removes the IDE warning, does not affect behavior -->
     <uses-permission
         android:name="android.permission.FOREGROUND_SERVICE"
         tools:ignore="ForegroundServicePermission" />
 
-    <!-- Обязательно для foregroundServiceType="specialUse" на API 34+ -->
+    <!-- Mandatory for foregroundServiceType="specialUse" on API 34+ -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
-    <!-- Нужно для показа уведомлений на API 33+ -->
+    <!-- Required for showing notifications on API 33+ -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
-    <!-- Для восстановления после перезагрузки устройства -->
+    <!-- For recovery after device reboot -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
@@ -32,7 +32,6 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
             android:theme="@style/Theme.actitracker">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

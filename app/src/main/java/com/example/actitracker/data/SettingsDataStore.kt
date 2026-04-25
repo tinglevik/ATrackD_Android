@@ -3,7 +3,6 @@ package com.example.actitracker.data
 import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
-import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
@@ -18,7 +17,6 @@ class SettingsDataStore(private val context: Context) {
         private val BACKGROUND_COLOR_KEY = intPreferencesKey("background_color")
         private val CONTENT_COLOR_KEY = intPreferencesKey("content_color")
 
-        // ✅ Хранение firstStartTimes: JSON строка "activityId:timestamp,..."
         private val FIRST_START_TIMES_KEY = stringPreferencesKey("first_start_times")
 
         val DEFAULT_COLOR_ARGB: Int = 0xFFFFFBFE.toInt()
@@ -33,7 +31,6 @@ class SettingsDataStore(private val context: Context) {
         prefs[CONTENT_COLOR_KEY] ?: DEFAULT_CONTENT_COLOR_ARGB
     }
 
-    // ✅ Flow для firstStartTimes
     val firstStartTimesFlow: Flow<Map<Long, Long>> = context.dataStore.data.map { prefs ->
         val json = prefs[FIRST_START_TIMES_KEY] ?: return@map emptyMap()
         parseFirstStartTimes(json)
@@ -51,7 +48,6 @@ class SettingsDataStore(private val context: Context) {
         }
     }
 
-    // ✅ Сохранение firstStartTimes
     suspend fun saveFirstStartTimes(times: Map<Long, Long>) {
         context.dataStore.edit { prefs ->
             prefs[FIRST_START_TIMES_KEY] = serializeFirstStartTimes(times)
@@ -72,7 +68,7 @@ class SettingsDataStore(private val context: Context) {
                 result[key.toLong()] = obj.getLong(key)
             }
             result
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             emptyMap()
         }
     }

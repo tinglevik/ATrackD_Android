@@ -21,7 +21,7 @@
         android:orientation="vertical"
         android:gravity="center">
 
-        <!-- TextView для Emoji-иконок (гарантирует видимость в шторке и на локскрине) -->
+        <!-- TextView for Emoji-icons (guarantees visibility in the notification shade and on the lockscreen) -->
         <TextView
             android:id="@+id/activity_icon"
             android:layout_width="wrap_content"

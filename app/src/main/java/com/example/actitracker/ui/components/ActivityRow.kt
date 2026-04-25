@@ -9,11 +9,25 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Label
-import androidx.compose.material3.*
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -21,7 +35,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -29,13 +45,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.res.stringResource
 import com.example.actitracker.R
 import com.example.actitracker.data.model.ActivityItem
 import com.example.actitracker.data.model.TagItem
-import java.text.SimpleDateFormat
 import java.util.Date
-import java.util.Locale
 import kotlin.math.roundToInt
 
 @Composable
@@ -50,6 +63,13 @@ fun ActivityRow(
     showFirstStart: Boolean = true,
     onClick: () -> Unit
 ) {
+    val configuration = LocalConfiguration.current
+    val locale = configuration.locales[0]
+
+    val timeFormatter = remember(locale) {
+        android.icu.text.DateFormat.getTimeInstance(android.icu.text.DateFormat.SHORT, locale)
+    }
+
     val liveSeconds = remember(
         activity.elapsedSeconds, isActive, currentTime, activeStartTime
     ) {
@@ -117,9 +137,9 @@ fun ActivityRow(
 
                     if (showFirstStart) {
                         activity.firstStartDayTime?.let { firstStart ->
-                            val timeStr = SimpleDateFormat("HH:mm", Locale.getDefault()).format(
-                                Date(firstStart)
-                            )
+                            val timeStr = remember(firstStart, timeFormatter) {
+                                timeFormatter.format(Date(firstStart))
+                            }
                             Text(
                                 text = stringResource(R.string.first_start_label, timeStr),
                                 fontSize = ActivityRowDimens.firstStartDayTimeFontSize,
@@ -137,7 +157,7 @@ fun ActivityRow(
                     )
                 )
 
-                // ⏱️ ТАЙМЕР
+                // ⏱️ Timer
                 if (showTimer && (isActive || liveSeconds > 0)) {
                     Text(
                         text = formatSeconds(liveSeconds),
@@ -253,12 +273,12 @@ fun DotsLoader(
         EllipsisMoveEasing.transform(linearInPhase)
     }
 
-    // Расстояние между центрами соседних точек
+    // Distance between nearest dots
     val spacing = dotSize + ActivityRowDimens.dotSpacing
     val density = LocalDensity.current
     val spacingPx = with(density) { spacing.toPx() }
 
-    // Ширина контейнера = ровно 3 точки с промежутками
+    // Container width = 3 dots with distances between
     val containerWidth = dotSize + spacing * 2
 
     Box(
@@ -353,7 +373,7 @@ fun ActivityRowPreview() {
         activity = sampleActivity,
         isActive = true,
         currentTime = System.currentTimeMillis(),
-        activeStartTime = System.currentTimeMillis() - 120_000, // +2 мин
+        activeStartTime = System.currentTimeMillis() - 120_000, // +2 min
         allTags = sampleTags,
         showTimer = true,
         showFirstStart = true,

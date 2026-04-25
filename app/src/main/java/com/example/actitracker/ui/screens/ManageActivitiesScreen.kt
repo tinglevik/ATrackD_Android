@@ -54,7 +54,7 @@ import com.example.actitracker.data.model.TagItem
 import androidx.compose.ui.res.stringResource
 import com.example.actitracker.ui.components.ActivityRow
 import com.example.actitracker.ui.components.verticalScrollbar
-import com.example.actitracker.ui.theme.actitrackerTheme
+import com.example.actitracker.ui.theme.ActitrackerTheme
 
 enum class ManageTab(
     val titleRes: Int,
@@ -84,10 +84,12 @@ enum class ManageTab(
 
 @Composable
 fun ManageActivitiesScreen(
+    navController: NavHostController,
     activities: List<ActivityItem>,
     onActivityUpdate: (ActivityItem) -> Unit,
     onActivityCreate: (ActivityItem) -> Unit,
     onActivityDelete: (Long) -> Unit,
+    modifier: Modifier = Modifier,
     tags: List<TagItem> = emptyList(),
     onTagUpdate: (TagItem) -> Unit = {},
     onTagCreate: (TagItem) -> Unit = {},
@@ -96,8 +98,6 @@ fun ManageActivitiesScreen(
     onGoalUpdate: (GoalItem) -> Unit = {},
     onGoalCreate: (GoalItem) -> Unit = {},
     onGoalDelete: (Long) -> Unit = {},
-    navController: NavHostController,
-    modifier: Modifier = Modifier,
     backgroundColor: Color = MaterialTheme.colorScheme.background,
     contentColor: Color = MaterialTheme.colorScheme.onBackground,
 ) {
@@ -329,22 +329,44 @@ fun ManageActivitiesScreen(
             }
         }
 
-        // Dialogs logic based on tab
+        // Dialogs for creation
+        if (showCreateDialog) {
+            when (selectedTab) {
+                ManageTab.ACTIVITIES -> EditActivityDialog(
+                    // Changing the default icon to a filled circle
+                    activity = ActivityItem(-1, "", Color.Cyan, "●"),
+                    allTags = tags,
+                    isCreating = true,
+                    onDismiss = { showCreateDialog = false },
+                    onSave = { onActivityCreate(it); showCreateDialog = false },
+                    onDelete = {},
+                    dialogBackgroundColor = contentColor,
+                    dialogContentColor = backgroundColor
+                )
+                ManageTab.TAGS -> EditTagDialog(
+                    tag = TagItem(-1, "", Color.Cyan),
+                    isCreating = true,
+                    onDismiss = { showCreateDialog = false },
+                    onSave = { onTagCreate(it); showCreateDialog = false },
+                    onDelete = {},
+                    dialogBackgroundColor = contentColor,
+                    dialogContentColor = backgroundColor
+                )
+                ManageTab.GOALS -> EditGoalDialog(
+                    goal = GoalItem(-1, "", 0, "DAILY"),
+                    isCreating = true,
+                    onDismiss = { showCreateDialog = false },
+                    onSave = { onGoalCreate(it); showCreateDialog = false },
+                    onDelete = {},
+                    dialogBackgroundColor = contentColor,
+                    dialogContentColor = backgroundColor
+                )
+            }
+        }
+
+        // Dialogs for editing existing items
         when (selectedTab) {
             ManageTab.ACTIVITIES -> {
-                if (showCreateDialog) {
-                    EditActivityDialog(
-                        // Смена иконки по умолчанию на закрашенный круг
-                        activity = ActivityItem(-1, "", Color.Cyan, "●"),
-                        allTags = tags,
-                        isCreating = true,
-                        onDismiss = { showCreateDialog = false },
-                        onSave = { onActivityCreate(it); showCreateDialog = false },
-                        onDelete = {},
-                        dialogBackgroundColor = contentColor,
-                        dialogContentColor = backgroundColor
-                    )
-                }
                 editingActivity?.let { activity ->
                     EditActivityDialog(
                         activity = activity,
@@ -359,17 +381,6 @@ fun ManageActivitiesScreen(
             }
 
             ManageTab.TAGS -> {
-                if (showCreateDialog) {
-                    EditTagDialog(
-                        tag = TagItem(-1, "", Color.Cyan),
-                        isCreating = true,
-                        onDismiss = { showCreateDialog = false },
-                        onSave = { onTagCreate(it); showCreateDialog = false },
-                        onDelete = {},
-                        dialogBackgroundColor = contentColor,
-                        dialogContentColor = backgroundColor
-                    )
-                }
                 editingTag?.let { tag ->
                     EditTagDialog(
                         tag = tag,
@@ -383,17 +394,6 @@ fun ManageActivitiesScreen(
             }
 
             ManageTab.GOALS -> {
-                if (showCreateDialog) {
-                    EditGoalDialog(
-                        goal = GoalItem(-1, "", 0, "DAILY"),
-                        isCreating = true,
-                        onDismiss = { showCreateDialog = false },
-                        onSave = { onGoalCreate(it); showCreateDialog = false },
-                        onDelete = {},
-                        dialogBackgroundColor = contentColor,
-                        dialogContentColor = backgroundColor
-                    )
-                }
                 editingGoal?.let { goal ->
                     EditGoalDialog(
                         goal = goal,
@@ -484,8 +484,9 @@ fun ManageActivitiesScreenPreview() {
         GoalItem(2, "Weekly Exercise", 3600 * 10, "WEEKLY")
     )
 
-    actitrackerTheme {
+    ActitrackerTheme {
         ManageActivitiesScreen(
+            navController = rememberNavController(),
             activities = sampleActivities,
             onActivityUpdate = {},
             onActivityCreate = {},
@@ -497,8 +498,7 @@ fun ManageActivitiesScreenPreview() {
             goals = sampleGoals,
             onGoalUpdate = {},
             onGoalCreate = {},
-            onGoalDelete = {},
-            navController = rememberNavController()
+            onGoalDelete = {}
         )
     }
 }
