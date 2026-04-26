@@ -20,6 +20,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.actitracker.R
 import com.example.actitracker.ui.components.ContrastUtils
+import androidx.compose.ui.tooling.preview.Preview
+import com.example.actitracker.ui.theme.ActitrackerTheme
 import com.example.actitracker.viewmodel.SettingsViewModel
 
 private enum class ColorPickerTarget { BACKGROUND, TEXT }
@@ -33,6 +35,27 @@ fun SettingsScreen(
     val backgroundColorState by settingsViewModel.backgroundColor.collectAsState()
     val savedContentColor by settingsViewModel.contentColor.collectAsState()
 
+    SettingsScreenContent(
+        backgroundColorState = backgroundColorState,
+        savedContentColor = savedContentColor,
+        onBackgroundColorChange = { settingsViewModel.saveBackgroundColor(it) },
+        onContentColorChange = { settingsViewModel.saveContentColor(it) },
+        onShowWarning = { bg, txt -> settingsViewModel.showWarning(bg, txt) },
+        onNavigateToLicenses = onNavigateToLicenses,
+        contentColor = contentColor
+    )
+}
+
+@Composable
+fun SettingsScreenContent(
+    backgroundColorState: Color,
+    savedContentColor: Color,
+    onBackgroundColorChange: (Color) -> Unit,
+    onContentColorChange: (Color) -> Unit,
+    onShowWarning: (Color, Color) -> Unit,
+    onNavigateToLicenses: () -> Unit,
+    contentColor: Color = Color.Black
+) {
     var colorPickerTarget by remember { mutableStateOf<ColorPickerTarget?>(null) }
     var showContrastDialog by remember { mutableStateOf(false) }
     var pendingColor by remember { mutableStateOf<Color?>(null) }
@@ -83,7 +106,7 @@ fun SettingsScreen(
                                             contrastDialogSource = ColorPickerTarget.BACKGROUND
                                             showContrastDialog = true
                                         } else {
-                                            settingsViewModel.saveBackgroundColor(color)
+                                            onBackgroundColorChange(color)
                                         }
                                     }
                                     ColorPickerTarget.TEXT -> {
@@ -92,7 +115,7 @@ fun SettingsScreen(
                                             contrastDialogSource = ColorPickerTarget.TEXT
                                             showContrastDialog = true
                                         } else {
-                                            settingsViewModel.saveContentColor(color)
+                                            onContentColorChange(color)
                                         }
                                     }
                                     null -> {}
@@ -103,9 +126,9 @@ fun SettingsScreen(
                                 if (openedFromContrastDialog && colorBeforeContrastFlow != null) {
                                     when (contrastDialogSource) {
                                         ColorPickerTarget.BACKGROUND ->
-                                            settingsViewModel.saveBackgroundColor(colorBeforeContrastFlow!!)
+                                            onBackgroundColorChange(colorBeforeContrastFlow!!)
                                         ColorPickerTarget.TEXT ->
-                                            settingsViewModel.saveContentColor(colorBeforeContrastFlow!!)
+                                            onContentColorChange(colorBeforeContrastFlow!!)
                                         null -> {}
                                     }
                                 }
@@ -187,11 +210,11 @@ fun SettingsScreen(
                             ContrastUtils.suggestBackgroundColors(pendingColor!!),
                         onSuggestionSelected = { suggested ->
                             if (isFromBg) {
-                                settingsViewModel.saveBackgroundColor(pendingColor!!)
-                                settingsViewModel.saveContentColor(suggested)
+                                onBackgroundColorChange(pendingColor!!)
+                                onContentColorChange(suggested)
                             } else {
-                                settingsViewModel.saveContentColor(pendingColor!!)
-                                settingsViewModel.saveBackgroundColor(suggested)
+                                onContentColorChange(pendingColor!!)
+                                onBackgroundColorChange(suggested)
                             }
                             showContrastDialog = false
                             pendingColor = null
@@ -201,10 +224,10 @@ fun SettingsScreen(
                             colorBeforeContrastFlow = if (isFromBg) backgroundColorState else savedContentColor
                             openedFromContrastDialog = true
                             if (isFromBg) {
-                                settingsViewModel.saveBackgroundColor(pendingColor!!)
+                                onBackgroundColorChange(pendingColor!!)
                                 colorPickerTarget = ColorPickerTarget.TEXT
                             } else {
-                                settingsViewModel.saveContentColor(pendingColor!!)
+                                onContentColorChange(pendingColor!!)
                                 colorPickerTarget = ColorPickerTarget.BACKGROUND
                             }
                             showContrastDialog = false
@@ -212,11 +235,11 @@ fun SettingsScreen(
                         },
                         onKeepAnyway = {
                             if (isFromBg) {
-                                settingsViewModel.saveBackgroundColor(pendingColor!!)
+                                onBackgroundColorChange(pendingColor!!)
                             } else {
-                                settingsViewModel.saveContentColor(pendingColor!!)
+                                onContentColorChange(pendingColor!!)
                             }
-                            settingsViewModel.showWarning(backgroundColorState, savedContentColor)
+                            onShowWarning(backgroundColorState, savedContentColor)
                             showContrastDialog = false
                             pendingColor = null
                             contrastDialogSource = null
@@ -260,7 +283,9 @@ private fun SettingsColorCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Column {
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
                 Text(
                     text = title,
                     fontSize = 16.sp,
@@ -270,9 +295,13 @@ private fun SettingsColorCard(
                 Text(
                     text = subtitle,
                     fontSize = 12.sp,
+                    lineHeight = 16.sp,
                     color = fixedSubtitleColor
                 )
             }
+
+            Spacer(modifier = Modifier.width(12.dp))
+
             Box(
                 modifier = Modifier
                     .size(40.dp)
@@ -311,7 +340,9 @@ private fun SettingsActionCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Column {
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
                 Text(
                     text = title,
                     fontSize = 16.sp,
@@ -321,9 +352,13 @@ private fun SettingsActionCard(
                 Text(
                     text = subtitle,
                     fontSize = 12.sp,
+                    lineHeight = 16.sp,
                     color = fixedSubtitleColor
                 )
             }
+
+            Spacer(modifier = Modifier.width(12.dp))
+
             Icon(
                 imageVector = icon,
                 contentDescription = null,
@@ -331,5 +366,21 @@ private fun SettingsActionCard(
                 modifier = Modifier.size(24.dp)
             )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SettingsScreenPreview() {
+    ActitrackerTheme {
+        SettingsScreenContent(
+            backgroundColorState = Color.White,
+            savedContentColor = Color.Black,
+            onBackgroundColorChange = {},
+            onContentColorChange = {},
+            onShowWarning = { _, _ -> },
+            onNavigateToLicenses = {},
+            contentColor = Color.Black
+        )
     }
 }
