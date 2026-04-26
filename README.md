@@ -1,5 +1,7 @@
 # ActiTracker
 
+[English] | [Русский](README.ru.md) | [Deutsch](README.de.md) | [Español](README.es.md) | [Українська](README.uk.md)
+
 <div style="text-align: center;">
   <b>A simple and convenient time tracker that allows you to visually evaluate your daily activities.</b>
 </div>

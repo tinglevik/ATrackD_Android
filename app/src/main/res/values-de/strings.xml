@@ -1,0 +1,155 @@
+<resources>
+    <string name="app_name">ActiTracker</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="nav_today">Heute</string>
+    <string name="nav_report">Bericht</string>
+    <string name="nav_settings">Einstellungen</string>
+    <string name="manage_activities_title">Aktivitäten verwalten</string>
+    <string name="manage_tags_title">Tags verwalten</string>
+    <string name="manage_goals_title">Ziele verwalten</string>
+    <string name="delete_item_title">Element löschen?</string>
+    <string name="delete_item_confirm">Sind Sie sicher?</string>
+
+    <!-- Today Screen -->
+    <string name="add_activity">Hinzufügen</string>
+    <string name="task_header">Aufgabe</string>
+    <string name="filter_all_tags">Alle Tags</string>
+    <string name="filter_no_tag">Kein Tag</string>
+    <string name="filter_description">Filter</string>
+    <string name="search_hint">Suche</string>
+    <string name="clear_search">Löschen</string>
+    <string name="error_name_empty">Name darf nicht leer sein</string>
+    <string name="manage_activities_desc">Aktivitäten verwalten</string>
+    <string name="manage_button">Verwalten</string>
+    <string name="current_task_header">Aktuelle Aufgabe</string>
+    <string name="no_activity_running">Keine Aktivität läuft</string>
+    <string name="stop_activity_desc">Stopp</string>
+    <string name="first_start_label">Erster Start: %1$s</string>
+
+    <!-- Report Screen -->
+    <string name="prev_period">Zurück</string>
+    <string name="next_period">Weiter</string>
+    <string name="switch_to_tags">Zu Tags wechseln</string>
+    <string name="switch_to_activities">Zu Aktivitäten wechseln</string>
+    <string name="no_report_data">Keine Daten für diesen Zeitraum</string>
+    <string name="total_time_label">Gesamt</string>
+    <string name="no_tag_label">Kein Tag</string>
+    <string name="unknown_tag_label">Unbekannter Tag</string>
+    <string name="period_7_days">7 Tage</string>
+    <string name="period_30_days">30 Tage</string>
+    <string name="period_year">Jahr</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Einstellungen</string>
+    <string name="settings_appearance">Erscheinungsbild</string>
+    <string name="settings_background_color">Hintergrundfarbe</string>
+    <string name="settings_background_color_desc">Tippen, um den App-Hintergrund zu ändern</string>
+    <string name="settings_content_color">Text- &amp; Symbolfarbe</string>
+    <string name="settings_content_color_desc">Tippen, um Text- und Symbolfarbe zu ändern</string>
+    <string name="settings_about">Über</string>
+    <string name="settings_licenses">Open-Source-Lizenzen</string>
+    <string name="settings_licenses_desc">Credits und rechtliche Informationen</string>
+    <string name="contrast_warning_background">Wählen Sie einen Hintergrund, der gut mit Ihrer Textfarbe kontrastiert</string>
+    <string name="contrast_warning_text">Wählen Sie eine Textfarbe, die gut mit Ihrem Hintergrund kontrastiert</string>
+    <string name="settings_reverted">Änderungen rückgängig gemacht</string>
+    <string name="settings_saved">Änderungen gespeichert</string>
+
+    <!-- Edit Activity Dialog -->
+    <string name="create_activity_title">Aktivität erstellen</string>
+    <string name="edit_activity_title">Aktivität bearbeiten</string>
+    <string name="activity_name_label">Name</string>
+    <string name="activity_color_label">Farbe</string>
+    <string name="activity_icon_label">Symbol</string>
+    <string name="activity_tag_label">Tag</string>
+    <string name="add_tag_button">+ TAG</string>
+    <string name="no_more_tags">Keine weiteren Tags</string>
+    <string name="remove_tag_desc">Tag entfernen</string>
+    <string name="show_in_notification_label">In Benachrichtigung anzeigen</string>
+    <string name="show_in_notification_desc">Schnellzugriff über Benachrichtigungsleiste\nund Sperrbildschirm</string>
+    <string name="save_button">Speichern</string>
+    <string name="cancel_button">Abbrechen</string>
+    <string name="delete_button">Löschen</string>
+
+    <!-- Manage Activities Screen -->
+    <string name="add_button">Hinzufügen</string>
+
+    <!-- Edit Tag Dialog -->
+    <string name="create_tag_title">Tag erstellen</string>
+    <string name="edit_tag_title">Tag bearbeiten</string>
+    <string name="tag_name_label">Name</string>
+    <string name="tag_color_label">Farbe</string>
+    <string name="error_tag_name_empty">Name darf nicht leer sein</string>
+
+    <!-- Icon Picker Screen -->
+    <string name="select_icon_title">Symbol auswählen</string>
+    <string name="search_icons_hint">Symbole oder Tags suchen…</string>
+
+    <!-- Edit Goal Dialog -->
+    <string name="create_goal_title">Ziel erstellen</string>
+    <string name="edit_goal_title">Ziel bearbeiten</string>
+    <string name="goal_name_label">Name</string>
+    <string name="target_hours_label">Zielstunden</string>
+    <string name="goal_period_label">Zeitraum</string>
+    <string name="period_daily">Täglich</string>
+    <string name="period_weekly">Wöchentlich</string>
+    <string name="period_daily_format">%1$d Std. pro Tag</string>
+    <string name="period_weekly_format">%1$d Std. pro Woche</string>
+
+    <!-- Quick Panel Toggle Dialog -->
+    <string name="quick_panel_add_desc">Zum Benachrichtigungsfeld und Sperrbildschirm für Schnellzugriff hinzufügen?</string>
+    <string name="quick_panel_remove_desc">Aus Benachrichtigungsfeld und Sperrbildschirm entfernen?</string>
+    <string name="quick_panel_add_button">Hinzufügen</string>
+    <string name="quick_panel_remove_button">Entfernen</string>
+
+    <!-- Notification Service -->
+    <string name="notification_channel_name">Activity Tracker</string>
+    <string name="notification_channel_desc">Schnellzugriff auf Ihre Aktivitäten</string>
+
+    <!-- Contrast Suggestion Dialog -->
+    <string name="contrast_dialog_title">Geringer Kontrast!</string>
+    <string name="contrast_bg_change_desc">Die aktuelle Textfarbe ist auf dem neuen Hintergrund möglicherweise nicht lesbar.</string>
+    <string name="contrast_text_change_desc">Die gewählte Textfarbe ist auf dem aktuellen Hintergrund nicht lesbar.</string>
+    <string name="contrast_preview_text">Beispieltext Vorschau</string>
+    <string name="contrast_choose_color_label">Wählen Sie eine lesbare Farbe:</string>
+    <string name="contrast_pick_text_manual">Textfarbe manuell wählen</string>
+    <string name="contrast_pick_bg_manual">Hintergrundfarbe manuell wählen</string>
+    <string name="contrast_keep_anyway">Trotzdem behalten (nicht empfohlen)</string>
+    <string name="apply_button">Anwenden</string>
+
+    <!-- Low Contrast Warning Drawer -->
+    <string name="contrast_drawer_title">Warnung bei geringem Kontrast</string>
+    <string name="contrast_drawer_desc">Text ist mit diesen Farben möglicherweise unlesbar.</string>
+    <string name="contrast_reverting_in">Rückgängig in %1$ds</string>
+    <string name="revert_button">Rückgängig</string>
+    <string name="keep_changes_button">Änderungen behalten</string>
+    <string name="minimize_button">Minimieren</string>
+
+    <!-- Color Picker Screen -->
+    <string name="color_picker_title">Farbe wählen</string>
+    <string name="color_picker_confirm">Bestätigen</string>
+    <string name="color_picker_current">Aktuell:</string>
+    <string name="color_picker_new">Neu:</string>
+    <string name="color_picker_hex_label">HEX-Farbe</string>
+    <string name="color_picker_hex_error">Ungültige HEX-Farbe. Format verwenden: #RRGGBB</string>
+    <string name="info_desc">Info</string>
+
+    <!-- Long Press Activity Row -->
+    <string name="started_at_format">Gestartet um %1$s</string>
+
+    <!-- Icon Categories -->
+    <string name="category_general">Allgemein</string>
+    <string name="category_activities">Aktivitäten</string>
+    <string name="category_work_study">Arbeit &amp; Studium</string>
+    <string name="category_nature">Natur</string>
+    <string name="category_food_drinks">Essen &amp; Trinken</string>
+    <string name="category_symbols">Weitere Symbole</string>
+
+    <!-- General / Navigation -->
+    <string name="back_button">Zurück</string>
+
+    <string name="yes_confirm">Ja</string>
+    <!-- Licenses Screen -->
+    <string name="license_material_icons">Material Icons (Google)</string>
+    <string name="license_apache_title">Apache License 2.0</string>
+    <string name="license_apache_header">Apache License\nVersion 2.0, Januar 2004\nhttp://www.apache.org/licenses/</string>
+</resources>

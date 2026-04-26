@@ -1,5 +1,7 @@
 # actitracker — User Guide
 
+[English] | [Русский](ru/USER_GUIDE.md) | [Deutsch](de/USER_GUIDE.md) | [Español](es/USER_GUIDE.md) | [Українська](uk/USER_GUIDE.md)
+
 ### 🚀 1. Create a List of Activities
 To create an activity, click on the "+" button
 

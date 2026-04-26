@@ -1,0 +1,155 @@
+<resources>
+    <string name="app_name">ActiTracker</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="nav_today">Сегодня</string>
+    <string name="nav_report">Отчет</string>
+    <string name="nav_settings">Настройки</string>
+    <string name="manage_activities_title">Управление активностями</string>
+    <string name="manage_tags_title">Управление тегами</string>
+    <string name="manage_goals_title">Управление целями</string>
+    <string name="delete_item_title">Удалить элемент?</string>
+    <string name="delete_item_confirm">Вы уверены?</string>
+
+    <!-- Today Screen -->
+    <string name="add_activity">Добавить</string>
+    <string name="task_header">Задача</string>
+    <string name="filter_all_tags">Все теги</string>
+    <string name="filter_no_tag">Без тега</string>
+    <string name="filter_description">Фильтр</string>
+    <string name="search_hint">Поиск</string>
+    <string name="clear_search">Очистить</string>
+    <string name="error_name_empty">Имя не может быть пустым</string>
+    <string name="manage_activities_desc">Управление активностями</string>
+    <string name="manage_button">Управление</string>
+    <string name="current_task_header">Текущая задача</string>
+    <string name="no_activity_running">Нет активных задач</string>
+    <string name="stop_activity_desc">Остановить</string>
+    <string name="first_start_label">Первый запуск: %1$s</string>
+
+    <!-- Report Screen -->
+    <string name="prev_period">Пред.</string>
+    <string name="next_period">След.</string>
+    <string name="switch_to_tags">Переключить на теги</string>
+    <string name="switch_to_activities">Переключить на активности</string>
+    <string name="no_report_data">Нет данных за этот период</string>
+    <string name="total_time_label">Всего</string>
+    <string name="no_tag_label">Без тега</string>
+    <string name="unknown_tag_label">Неизвестный тег</string>
+    <string name="period_7_days">7 дней</string>
+    <string name="period_30_days">30 дней</string>
+    <string name="period_year">Год</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Настройки</string>
+    <string name="settings_appearance">Внешний вид</string>
+    <string name="settings_background_color">Цвет фона</string>
+    <string name="settings_background_color_desc">Нажмите, чтобы изменить фон приложения</string>
+    <string name="settings_content_color">Цвет текста и иконок</string>
+    <string name="settings_content_color_desc">Нажмите, чтобы изменить цвет текста и иконок</string>
+    <string name="settings_about">О приложении</string>
+    <string name="settings_licenses">Лицензии ПО</string>
+    <string name="settings_licenses_desc">Авторы и правовая информация</string>
+    <string name="contrast_warning_background">Выберите цвет фона, который хорошо контрастирует с цветом текста</string>
+    <string name="contrast_warning_text">Выберите цвет текста, который хорошо контрастирует с цветом фона</string>
+    <string name="settings_reverted">Изменения отменены</string>
+    <string name="settings_saved">Изменения сохранены</string>
+
+    <!-- Edit Activity Dialog -->
+    <string name="create_activity_title">Создать активность</string>
+    <string name="edit_activity_title">Изменить активность</string>
+    <string name="activity_name_label">Имя</string>
+    <string name="activity_color_label">Цвет</string>
+    <string name="activity_icon_label">Иконка</string>
+    <string name="activity_tag_label">Тег</string>
+    <string name="add_tag_button">+ ТЕГ</string>
+    <string name="no_more_tags">Нет доступных тегов</string>
+    <string name="remove_tag_desc">Удалить тег</string>
+    <string name="show_in_notification_label">Показывать в уведомлении</string>
+    <string name="show_in_notification_desc">Быстрый доступ из панели уведомлений\nи экрана блокировки</string>
+    <string name="save_button">Сохранить</string>
+    <string name="cancel_button">Отмена</string>
+    <string name="delete_button">Удалить</string>
+
+    <!-- Manage Activities Screen -->
+    <string name="add_button">Добавить</string>
+
+    <!-- Edit Tag Dialog -->
+    <string name="create_tag_title">Создать тег</string>
+    <string name="edit_tag_title">Изменить тег</string>
+    <string name="tag_name_label">Имя</string>
+    <string name="tag_color_label">Цвет</string>
+    <string name="error_tag_name_empty">Имя не может быть пустым</string>
+
+    <!-- Icon Picker Screen -->
+    <string name="select_icon_title">Выберите иконку</string>
+    <string name="search_icons_hint">Поиск иконок или тегов…</string>
+
+    <!-- Edit Goal Dialog -->
+    <string name="create_goal_title">Создать цель</string>
+    <string name="edit_goal_title">Изменить цель</string>
+    <string name="goal_name_label">Имя</string>
+    <string name="target_hours_label">Целевые часы</string>
+    <string name="goal_period_label">Период</string>
+    <string name="period_daily">Ежедневно</string>
+    <string name="period_weekly">Еженедельно</string>
+    <string name="period_daily_format">%1$dч в день</string>
+    <string name="period_weekly_format">%1$dч в неделю</string>
+
+    <!-- Quick Panel Toggle Dialog -->
+    <string name="quick_panel_add_desc">Добавить в панель уведомлений и на экран блокировки для быстрого доступа?</string>
+    <string name="quick_panel_remove_desc">Удалить из панели уведомлений и с экрана блокировки?</string>
+    <string name="quick_panel_add_button">Добавить</string>
+    <string name="quick_panel_remove_button">Удалить</string>
+
+    <!-- Notification Service -->
+    <string name="notification_channel_name">Activity Tracker</string>
+    <string name="notification_channel_desc">Быстрый доступ к вашим активностям</string>
+
+    <!-- Contrast Suggestion Dialog -->
+    <string name="contrast_dialog_title">Низкий контраст!</string>
+    <string name="contrast_bg_change_desc">Текущий цвет текста может быть нечитаемым на новом фоне.</string>
+    <string name="contrast_text_change_desc">Выбранный цвет текста не читается на текущем фоне.</string>
+    <string name="contrast_preview_text">Пример текста для предпросмотра</string>
+    <string name="contrast_choose_color_label">Выберите читаемый цвет:</string>
+    <string name="contrast_pick_text_manual">Выбрать цвет текста вручную</string>
+    <string name="contrast_pick_bg_manual">Выбрать цвет фона вручную</string>
+    <string name="contrast_keep_anyway">Оставить как есть (не рекомендуется)</string>
+    <string name="apply_button">Применить</string>
+
+    <!-- Low Contrast Warning Drawer -->
+    <string name="contrast_drawer_title">Предупреждение о низком контрасте</string>
+    <string name="contrast_drawer_desc">Текст может быть нечитаемым с этими цветами.</string>
+    <string name="contrast_reverting_in">Отмена через %1$dс</string>
+    <string name="revert_button">Отмена</string>
+    <string name="keep_changes_button">Сохранить изменения</string>
+    <string name="minimize_button">Свернуть</string>
+
+    <!-- Color Picker Screen -->
+    <string name="color_picker_title">Выберите цвет</string>
+    <string name="color_picker_confirm">Подтвердить</string>
+    <string name="color_picker_current">Текущий:</string>
+    <string name="color_picker_new">Новый:</string>
+    <string name="color_picker_hex_label">HEX Цвет</string>
+    <string name="color_picker_hex_error">Неверный HEX цвет. Используйте формат: #RRGGBB</string>
+    <string name="info_desc">Инфо</string>
+
+    <!-- Long Press Activity Row -->
+    <string name="started_at_format">Запущено в %1$s</string>
+
+    <!-- Icon Categories -->
+    <string name="category_general">Общие</string>
+    <string name="category_activities">Активности</string>
+    <string name="category_work_study">Работа и учеба</string>
+    <string name="category_nature">Природа</string>
+    <string name="category_food_drinks">Еда и напитки</string>
+    <string name="category_symbols">Другие символы</string>
+
+    <!-- General / Navigation -->
+    <string name="back_button">Назад</string>
+
+    <string name="yes_confirm">Да</string>
+    <!-- Licenses Screen -->
+    <string name="license_material_icons">Material Icons (Google)</string>
+    <string name="license_apache_title">Apache License 2.0</string>
+    <string name="license_apache_header">Apache License\nVersion 2.0, January 2004\nhttp://www.apache.org/licenses/</string>
+</resources>

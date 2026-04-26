@@ -14,7 +14,8 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         ActivityTagCrossRef::class,
         GoalEntity::class
     ],
-    version = 4
+    version = 4,
+    exportSchema = false
 )
 @TypeConverters(ActivityConverters::class)
 abstract class AppDatabase : RoomDatabase() {
