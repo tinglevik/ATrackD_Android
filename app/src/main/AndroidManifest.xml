@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:installLocation="auto">
+    android:installLocation="preferExternal">
 
     <!-- tools:ignore removes the IDE warning, does not affect behavior -->
     <uses-permission
@@ -19,14 +19,14 @@
 
     <application
         android:name=".ActiTrackerApplication"
-        android:allowBackup="true"
-        android:dataExtractionRules="@xml/data_extraction_rules"
-        android:fullBackupContent="@xml/backup_rules"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.actitracker"
+        android:requestLegacyExternalStorage="true"
+        android:preserveLegacyExternalStorage="true"
         tools:targetApi="31">
 
         <activity

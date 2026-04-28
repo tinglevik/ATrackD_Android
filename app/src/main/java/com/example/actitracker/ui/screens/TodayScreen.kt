@@ -70,7 +70,7 @@ import com.example.actitracker.data.model.TagItem
 import com.example.actitracker.ui.components.ActivityRowDimens
 import com.example.actitracker.ui.components.CircleIconButton
 import com.example.actitracker.ui.components.IconMapper
-import com.example.actitracker.ui.components.LongPressActivityRow
+import com.example.actitracker.ui.components.SwipeableActivityRow
 import com.example.actitracker.ui.components.formatSeconds
 import com.example.actitracker.ui.components.verticalScrollbar
 import kotlinx.coroutines.launch
@@ -134,7 +134,7 @@ fun TodayScreen(
         activities.filter { it.id == activeActivityId }
     }
 
-    var longPressedActivity by remember { mutableStateOf<ActivityItem?>(null) }
+    var swipedActivity by remember { mutableStateOf<ActivityItem?>(null) }
 
     Scaffold(
         containerColor = backgroundColor,
@@ -286,11 +286,12 @@ fun TodayScreen(
                     .verticalScrollbar(listState)
             ) {
                 items(filteredActivities, key = { it.id }) { activity ->
-                    LongPressActivityRow(
+                    SwipeableActivityRow(
                         activity = activity,
                         isActive = activity.id == activeActivityId,
                         currentTime = ticker,
                         activeStartTime = activeStartTime,
+                        backgroundColor = backgroundColor,
                         contentColor = contentColor,
                         onClick = {
                             if (activity.id == activeActivityId) {
@@ -299,8 +300,8 @@ fun TodayScreen(
                                 onStartActivity(activity.id)
                             }
                         },
-                        onLongPress = {
-                            longPressedActivity = activity
+                        onSwipe = {
+                            swipedActivity = activity
                         }
                     )
                 }
@@ -331,13 +332,13 @@ fun TodayScreen(
             )
         }
 
-        longPressedActivity?.let { activity ->
+        swipedActivity?.let { activity ->
             QuickPanelToggleDialog(
                 activity = activity,
-                onDismiss = { longPressedActivity = null },
+                onDismiss = { swipedActivity = null },
                 onToggle = { updated ->
                     onQuickPanelToggle(updated)
-                    longPressedActivity = null
+                    swipedActivity = null
                 },
                 dialogBackgroundColor = contentColor,
                 dialogContentColor = backgroundColor
