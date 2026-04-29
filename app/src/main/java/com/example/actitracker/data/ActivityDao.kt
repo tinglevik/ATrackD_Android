@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface ActivityDao {
 
-    @Query("SELECT * FROM activities")
+    @Query("SELECT * FROM activities ORDER BY sortOrder ASC, id ASC")
     fun getAllActivities(): Flow<List<ActivityEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -15,6 +15,9 @@ interface ActivityDao {
 
     @Update
     suspend fun updateActivity(activity: ActivityEntity)
+
+    @Update
+    suspend fun updateActivities(activities: List<ActivityEntity>)
 
     @Transaction
     suspend fun deleteActivityWithSessions(id: Long) {
@@ -33,7 +36,7 @@ interface ActivityDao {
     suspend fun deleteActivityTagRefs(activityId: Long)
 
     // Tags
-    @Query("SELECT * FROM tags")
+    @Query("SELECT * FROM tags ORDER BY sortOrder ASC, id ASC")
     fun getAllTags(): Flow<List<TagEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -41,6 +44,9 @@ interface ActivityDao {
 
     @Update
     suspend fun updateTag(tag: TagEntity)
+
+    @Update
+    suspend fun updateTags(tags: List<TagEntity>)
 
     @Query("DELETE FROM tags WHERE id = :tagId")
     suspend fun deleteTag(tagId: Long)

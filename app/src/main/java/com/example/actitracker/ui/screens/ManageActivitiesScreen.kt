@@ -53,6 +53,7 @@ import com.example.actitracker.data.model.GoalItem
 import com.example.actitracker.data.model.TagItem
 import androidx.compose.ui.res.stringResource
 import com.example.actitracker.ui.components.ActivityRow
+import com.example.actitracker.ui.components.ReorderableLazyColumn
 import com.example.actitracker.ui.components.verticalScrollbar
 import com.example.actitracker.ui.theme.ActitrackerTheme
 
@@ -89,11 +90,13 @@ fun ManageActivitiesScreen(
     onActivityUpdate: (ActivityItem) -> Unit,
     onActivityCreate: (ActivityItem) -> Unit,
     onActivityDelete: (Long) -> Unit,
+    onReorderActivities: (List<ActivityItem>) -> Unit = {},
     modifier: Modifier = Modifier,
     tags: List<TagItem> = emptyList(),
     onTagUpdate: (TagItem) -> Unit = {},
     onTagCreate: (TagItem) -> Unit = {},
     onTagDelete: (Long) -> Unit = {},
+    onReorderTags: (List<TagItem>) -> Unit = {},
     goals: List<GoalItem> = emptyList(),
     onGoalUpdate: (GoalItem) -> Unit = {},
     onGoalCreate: (GoalItem) -> Unit = {},
@@ -226,58 +229,66 @@ fun ManageActivitiesScreen(
         ) {
             when (selectedTab) {
                 ManageTab.ACTIVITIES -> {
-                    LazyColumn(
+                    ReorderableLazyColumn(
+                        items = activities,
+                        itemKey = { it.id },
+                        onReorder = onReorderActivities,
                         state = listState,
                         modifier = Modifier
                             .fillMaxSize()
                             .verticalScrollbar(listState)
-                    ) {
-                        items(activities) { activity ->
-                            ActivityRow(
-                                activity = activity,
-                                isActive = false,
-                                currentTime = 0L,
-                                activeStartTime = null,
-                                allTags = tags,
-                                contentColor = contentColor,
-                                showTimer = false,
-                                showFirstStart = false,
-                                onClick = { editingActivity = activity }
-                            )
-                        }
+                    ) { activity, _ ->
+                        ActivityRow(
+                            activity = activity,
+                            isActive = false,
+                            currentTime = 0L,
+                            activeStartTime = null,
+                            allTags = tags,
+                            contentColor = contentColor,
+                            showTimer = false,
+                            showFirstStart = false,
+                            onClick = { editingActivity = activity }
+                        )
                     }
                 }
 
                 ManageTab.TAGS -> {
-                    LazyColumn(modifier = Modifier.fillMaxSize()) {
-                        items(tags) { tag ->
-                            Column(modifier = Modifier.fillMaxWidth()) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable { editingTag = tag }
-                                        .padding(vertical = 8.dp, horizontal = 16.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.Label,
-                                        contentDescription = null,
-                                        tint = tag.color,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(12.dp))
-                                    Text(
-                                        text = tag.name,
-                                        fontSize = 16.sp,
-                                        color = contentColor
-                                    )
-                                }
-                                HorizontalDivider(
-                                    modifier = Modifier.padding(horizontal = 8.dp),
-                                    thickness = 1.dp,
-                                    color = contentColor.copy(alpha = 0.1f)
+                    val tagsListState = rememberLazyListState()
+                    ReorderableLazyColumn(
+                        items = tags,
+                        itemKey = { it.id },
+                        onReorder = onReorderTags,
+                        state = tagsListState,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScrollbar(tagsListState)
+                    ) { tag, _ ->
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { editingTag = tag }
+                                    .padding(vertical = 8.dp, horizontal = 16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.Label,
+                                    contentDescription = null,
+                                    tint = tag.color,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Text(
+                                    text = tag.name,
+                                    fontSize = 16.sp,
+                                    color = contentColor
                                 )
                             }
+                            HorizontalDivider(
+                                modifier = Modifier.padding(horizontal = 8.dp),
+                                thickness = 1.dp,
+                                color = contentColor.copy(alpha = 0.1f)
+                            )
                         }
                     }
                 }

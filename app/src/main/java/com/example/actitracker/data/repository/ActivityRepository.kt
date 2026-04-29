@@ -23,6 +23,10 @@ class ActivityRepository(
         dao.updateActivity(activity)
     }
 
+    suspend fun updateActivities(activities: List<ActivityEntity>) {
+        dao.updateActivities(activities)
+    }
+
     suspend fun deleteActivity(id: Long) {
         dao.deleteActivityWithSessions(id)
     }
@@ -33,6 +37,8 @@ class ActivityRepository(
     suspend fun insertTag(tag: TagEntity): Long = dao.insertTag(tag)
 
     suspend fun updateTag(tag: TagEntity) = dao.updateTag(tag)
+
+    suspend fun updateTags(tags: List<TagEntity>) = dao.updateTags(tags)
 
     suspend fun deleteTag(tagId: Long) = dao.deleteTag(tagId)
 

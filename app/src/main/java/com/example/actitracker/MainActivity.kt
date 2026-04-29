@@ -182,7 +182,8 @@ class MainActivity : ComponentActivity() {
                                         allTags = tags,
                                         backgroundColor = backgroundColor,
                                         contentColor = contentColor,
-                                        onQuickPanelToggle = { todayViewModel.toggleQuickPanel(it) }
+                                        onQuickPanelToggle = { todayViewModel.toggleQuickPanel(it) },
+                                        onReorderActivities = { todayViewModel.reorderActivities(it) }
                                     )
                                 }
 
@@ -193,10 +194,12 @@ class MainActivity : ComponentActivity() {
                                         onActivityUpdate = { todayViewModel.updateActivity(it) },
                                         onActivityCreate = { todayViewModel.addActivity(it) },
                                         onActivityDelete = { todayViewModel.deleteActivity(it) },
+                                        onReorderActivities = { todayViewModel.reorderActivities(it) },
                                         tags = tags,
                                         onTagUpdate = { todayViewModel.updateTag(it) },
                                         onTagCreate = { todayViewModel.addTag(it) },
                                         onTagDelete = { todayViewModel.deleteTag(it) },
+                                        onReorderTags = { todayViewModel.reorderTags(it) },
                                         goals = goals,
                                         onGoalUpdate = { todayViewModel.updateGoal(it) },
                                         onGoalCreate = { todayViewModel.addGoal(it) },

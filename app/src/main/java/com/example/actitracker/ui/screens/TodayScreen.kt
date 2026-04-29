@@ -70,6 +70,7 @@ import com.example.actitracker.data.model.TagItem
 import com.example.actitracker.ui.components.ActivityRowDimens
 import com.example.actitracker.ui.components.CircleIconButton
 import com.example.actitracker.ui.components.IconMapper
+import com.example.actitracker.ui.components.ReorderableLazyColumn
 import com.example.actitracker.ui.components.SwipeableActivityRow
 import com.example.actitracker.ui.components.formatSeconds
 import com.example.actitracker.ui.components.verticalScrollbar
@@ -95,6 +96,7 @@ fun TodayScreen(
     backgroundColor: Color = MaterialTheme.colorScheme.background,
     contentColor: Color = MaterialTheme.colorScheme.onBackground,
     onQuickPanelToggle: (ActivityItem) -> Unit,
+    onReorderActivities: (List<ActivityItem>) -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -108,6 +110,8 @@ fun TodayScreen(
     // Tag Filter State: null = All, -1L = No Tag, else = Tag ID
     var selectedTagFilterId by remember { mutableStateOf<Long?>(null) }
     var showFilterMenu by remember { mutableStateOf(false) }
+
+    val isFilterActive = searchQuery.isNotBlank() || selectedTagFilterId != null
 
     // Logic for filtering activities
     val filteredActivities = remember(
@@ -279,13 +283,44 @@ fun TodayScreen(
             }
 
             // Main Activities List
-            LazyColumn(
-                state = listState,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScrollbar(listState)
-            ) {
-                items(filteredActivities, key = { it.id }) { activity ->
+            if (isFilterActive) {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScrollbar(listState)
+                ) {
+                    items(filteredActivities, key = { it.id }) { activity ->
+                        SwipeableActivityRow(
+                            activity = activity,
+                            isActive = activity.id == activeActivityId,
+                            currentTime = ticker,
+                            activeStartTime = activeStartTime,
+                            backgroundColor = backgroundColor,
+                            contentColor = contentColor,
+                            onClick = {
+                                if (activity.id == activeActivityId) {
+                                    onStopActivity(activity.id)
+                                } else {
+                                    onStartActivity(activity.id)
+                                }
+                            },
+                            onSwipe = {
+                                swipedActivity = activity
+                            }
+                        )
+                    }
+                }
+            } else {
+                ReorderableLazyColumn(
+                    items = activities,
+                    itemKey = { it.id },
+                    onReorder = onReorderActivities,
+                    state = listState,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScrollbar(listState)
+                ) { activity, _ ->
                     SwipeableActivityRow(
                         activity = activity,
                         isActive = activity.id == activeActivityId,
@@ -674,6 +709,7 @@ fun TodayScreenPreview() {
         onCreateDismiss = {},
         onCreateSave = {},
         isCreating = false,
-        onQuickPanelToggle = {}
+        onQuickPanelToggle = {},
+        onReorderActivities = {}
     )
 }

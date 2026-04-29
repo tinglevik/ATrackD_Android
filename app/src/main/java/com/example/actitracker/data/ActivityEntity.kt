@@ -13,5 +13,6 @@ data class ActivityEntity(
     val color: Long,
     val icon: String,
     val showInQuickPanel: Boolean = false,
-    val tagIds: List<Long> = emptyList()
+    val tagIds: List<Long> = emptyList(),
+    val sortOrder: Int = 0
 )

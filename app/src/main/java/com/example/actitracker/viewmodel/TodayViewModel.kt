@@ -42,7 +42,7 @@ class TodayViewModel(
 
     val tags: StateFlow<List<TagItem>> =
         repository.getAllTags().map { entities ->
-            entities.map { TagItem(it.id, it.name, Color(it.color.toULong())) }
+            entities.map { TagItem(it.id, it.name, Color(it.color.toULong()), it.sortOrder) }
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val goals: StateFlow<List<GoalItem>> =
@@ -100,7 +100,8 @@ class TodayViewModel(
                         history = emptyMap(),
                         firstStartDayTime = firstStarts[entity.id],
                         showInQuickPanel = entity.showInQuickPanel,
-                        tagIds = entity.tagIds
+                        tagIds = entity.tagIds,
+                        sortOrder = entity.sortOrder
                     )
                 }
             }.collect { items ->
@@ -148,6 +149,7 @@ class TodayViewModel(
 
     fun addActivity(activity: ActivityItem) {
         viewModelScope.launch {
+            val maxSortOrder = _activitiesWithStats.value.maxOfOrNull { it.sortOrder } ?: 0
             repository.insertActivityAndGetId(
                 ActivityEntity(
                     id = 0,
@@ -155,7 +157,8 @@ class TodayViewModel(
                     color = activity.color.value.toLong(),
                     icon = activity.icon,
                     showInQuickPanel = activity.showInQuickPanel,
-                    tagIds = activity.tagIds
+                    tagIds = activity.tagIds,
+                    sortOrder = maxSortOrder + 1
                 )
             )
         }
@@ -191,9 +194,27 @@ class TodayViewModel(
                     color = updated.color.value.toLong(),
                     icon = updated.icon,
                     showInQuickPanel = updated.showInQuickPanel,
-                    tagIds = updated.tagIds
+                    tagIds = updated.tagIds,
+                    sortOrder = updated.sortOrder
                 )
             )
+        }
+    }
+
+    fun reorderActivities(reorderedList: List<ActivityItem>) {
+        viewModelScope.launch {
+            val updatedEntities = reorderedList.mapIndexed { index, item ->
+                ActivityEntity(
+                    id = item.id,
+                    name = item.name,
+                    color = item.color.value.toLong(),
+                    icon = item.icon,
+                    showInQuickPanel = item.showInQuickPanel,
+                    tagIds = item.tagIds,
+                    sortOrder = index
+                )
+            }
+            repository.updateActivities(updatedEntities)
         }
     }
 
@@ -207,13 +228,41 @@ class TodayViewModel(
     // Tags actions
     fun addTag(tag: TagItem) {
         viewModelScope.launch {
-            repository.insertTag(TagEntity(name = tag.name, color = tag.color.value.toLong()))
+            val maxSortOrder = tags.value.maxOfOrNull { it.sortOrder } ?: 0
+            repository.insertTag(
+                TagEntity(
+                    name = tag.name,
+                    color = tag.color.value.toLong(),
+                    sortOrder = maxSortOrder + 1
+                )
+            )
         }
     }
 
     fun updateTag(tag: TagItem) {
         viewModelScope.launch {
-            repository.updateTag(TagEntity(id = tag.id, name = tag.name, color = tag.color.value.toLong()))
+            repository.updateTag(
+                TagEntity(
+                    id = tag.id,
+                    name = tag.name,
+                    color = tag.color.value.toLong(),
+                    sortOrder = tag.sortOrder
+                )
+            )
+        }
+    }
+
+    fun reorderTags(reorderedList: List<TagItem>) {
+        viewModelScope.launch {
+            val updatedEntities = reorderedList.mapIndexed { index, item ->
+                TagEntity(
+                    id = item.id,
+                    name = item.name,
+                    color = item.color.value.toLong(),
+                    sortOrder = index
+                )
+            }
+            repository.updateTags(updatedEntities)
         }
     }
 
@@ -265,5 +314,6 @@ private fun ActivityEntity.toItem() = ActivityItem(
     color = Color(color.toULong()),
     icon = icon,
     showInQuickPanel = showInQuickPanel,
-    tagIds = tagIds
+    tagIds = tagIds,
+    sortOrder = sortOrder
 )
