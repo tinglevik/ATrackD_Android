@@ -8,11 +8,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -37,6 +39,8 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -61,6 +65,8 @@ fun EditTagDialog(
 
     var showColorPicker by remember { mutableStateOf(false) }
 
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
     val focusRequester = remember { FocusRequester() }
 
     AlertDialog(
@@ -119,7 +125,11 @@ fun EditTagDialog(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { showColorPicker = true }
+                        .clickable {
+                            focusManager.clearFocus()
+                            keyboardController?.hide()
+                            showColorPicker = true
+                        }
                         .padding(vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -182,10 +192,8 @@ fun EditTagDialog(
             )
         ) {
             Box(
-                modifier = Modifier
-                    .fillMaxWidth(0.9f)
-                    // Removed hard height constraint
-                    .clip(RoundedCornerShape(16.dp))
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
             ) {
                 ColorPickerScreen(
                     initialColor = selectedColor,
@@ -193,7 +201,11 @@ fun EditTagDialog(
                         selectedColor = it
                         showColorPicker = false
                     },
-                    onDismiss = { showColorPicker = false }
+                    onDismiss = { showColorPicker = false },
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .clip(RoundedCornerShape(16.dp))
+                        .wrapContentHeight()
                 )
             }
         }

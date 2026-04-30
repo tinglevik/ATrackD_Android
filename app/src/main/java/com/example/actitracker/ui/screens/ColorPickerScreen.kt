@@ -3,34 +3,56 @@ package com.example.actitracker.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.focusable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.graphics.toArgb
 import androidx.core.graphics.toColorInt
 import com.example.actitracker.R
 import com.example.actitracker.ui.components.HueBar
 import com.example.actitracker.ui.components.SaturationValuePanel
+import com.example.actitracker.ui.theme.ActitrackerTheme
 
 // Helper function: Compose Color → ARGB Int
 private fun Color.toArgbInt(): Int = toArgb()
@@ -55,9 +77,10 @@ private fun parseHexColor(hex: String): Color? {
 @Composable
 fun ColorPickerScreen(
     initialColor: Color,
-    contrastWarning: String? = null,
     onColorConfirmed: (Color) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+    contrastWarning: String? = null
 ) {
     val initialHsv = remember(initialColor) {
         val hsv = FloatArray(3)
@@ -70,7 +93,17 @@ fun ColorPickerScreen(
     var value by remember { mutableFloatStateOf(initialHsv[2]) }
 
     val selectedColor by remember(hue, saturation, value) {
-        mutableStateOf(Color(android.graphics.Color.HSVToColor(floatArrayOf(hue, saturation, value))))
+        mutableStateOf(
+            Color(
+                android.graphics.Color.HSVToColor(
+                    floatArrayOf(
+                        hue,
+                        saturation,
+                        value
+                    )
+                )
+            )
+        )
     }
 
     var hexInput by remember(selectedColor) {
@@ -84,14 +117,10 @@ fun ColorPickerScreen(
     val scrollState = rememberScrollState()
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = modifier
             .background(MaterialTheme.colorScheme.background)
-            .statusBarsPadding()
-            .navigationBarsPadding()
-            .imePadding()
             .verticalScroll(scrollState)
-            .padding(16.dp)
+            .padding(horizontal = 16.dp)
     ) {
         Box(
             modifier = Modifier
@@ -158,14 +187,17 @@ fun ColorPickerScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+//        Spacer(modifier = Modifier.height(8.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            Text(stringResource(R.string.color_picker_current), modifier = Modifier.padding(end = 8.dp))
+            Text(
+                stringResource(R.string.color_picker_current),
+                modifier = Modifier.padding(end = 8.dp)
+            )
             Box(
                 modifier = Modifier
                     .size(48.dp)
@@ -186,7 +218,7 @@ fun ColorPickerScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         SaturationValuePanel(
             hue = hue,
@@ -250,7 +282,7 @@ fun ColorPickerScreen(
                     focusManager.clearFocus()
                     // Shift focus to an invisible element
                     dummyFocusRequester.requestFocus()
-                    
+
                     val parsed = parseHexColor(hexInput)
                     if (parsed == null) {
                         hexError = true
@@ -268,11 +300,24 @@ fun ColorPickerScreen(
                 modifier = Modifier.padding(top = 4.dp)
             )
         }
-        
+
         Spacer(modifier = Modifier.height(24.dp))
     }
 
     LaunchedEffect(Unit) {
         dummyFocusRequester.requestFocus()
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ColorPickerScreenPreview() {
+    ActitrackerTheme {
+        ColorPickerScreen(
+            initialColor = Color.Blue,
+            onColorConfirmed = {},
+            onDismiss = {},
+            contrastWarning = "This color might be hard to read on a white background."
+        )
     }
 }

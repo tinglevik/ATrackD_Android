@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material3.*
@@ -18,6 +19,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.example.actitracker.R
 import com.example.actitracker.ui.components.ContrastUtils
 import androidx.compose.ui.tooling.preview.Preview
@@ -63,194 +66,233 @@ fun SettingsScreenContent(
     var openedFromContrastDialog by remember { mutableStateOf(false) }
     var colorBeforeContrastFlow by remember { mutableStateOf<Color?>(null) }
 
-    val snackbarHostState = remember { SnackbarHostState() }
-    var snackbarMessage by remember { mutableStateOf<String?>(null) }
-
-    LaunchedEffect(snackbarMessage) {
-        snackbarMessage?.let {
-            snackbarHostState.showSnackbar(it)
-            snackbarMessage = null
+    val onColorConfirmedInternal: (Color) -> Unit = { color ->
+        val target = colorPickerTarget
+        colorPickerTarget = null
+        openedFromContrastDialog = false
+        colorBeforeContrastFlow = null
+        when (target) {
+            ColorPickerTarget.BACKGROUND -> {
+                if (!ContrastUtils.isReadable(savedContentColor, color)) {
+                    pendingColor = color
+                    contrastDialogSource = ColorPickerTarget.BACKGROUND
+                    showContrastDialog = true
+                } else {
+                    onBackgroundColorChange(color)
+                }
+            }
+            ColorPickerTarget.TEXT -> {
+                if (!ContrastUtils.isReadable(color, backgroundColorState)) {
+                    pendingColor = color
+                    contrastDialogSource = ColorPickerTarget.TEXT
+                    showContrastDialog = true
+                } else {
+                    onContentColorChange(color)
+                }
+            }
+            null -> {}
         }
     }
+
+    val onDismissInternal: () -> Unit = {
+        if (openedFromContrastDialog && colorBeforeContrastFlow != null) {
+            when (contrastDialogSource) {
+                ColorPickerTarget.BACKGROUND ->
+                    onBackgroundColorChange(colorBeforeContrastFlow!!)
+                ColorPickerTarget.TEXT ->
+                    onContentColorChange(colorBeforeContrastFlow!!)
+                null -> {}
+            }
+        }
+        colorPickerTarget = null
+        openedFromContrastDialog = false
+        colorBeforeContrastFlow = null
+        contrastDialogSource = null
+    }
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    var snackbarMessage by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
         containerColor = backgroundColorState,
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { paddingValues ->
 
-        Box(modifier = Modifier.fillMaxSize()) {
+        LaunchedEffect(snackbarMessage) {
+            snackbarMessage?.let {
+                snackbarHostState.showSnackbar(it)
+                snackbarMessage = null
+            }
+        }
 
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-            ) {
-                when {
-                    colorPickerTarget != null -> {
-                        val isBackground = colorPickerTarget == ColorPickerTarget.BACKGROUND
+        Box(modifier = Modifier.fillMaxSize()) {
+            when {
+                colorPickerTarget != null && !openedFromContrastDialog -> {
+                    val isBackground = colorPickerTarget == ColorPickerTarget.BACKGROUND
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.background)
+                    ) {
                         ColorPickerScreen(
+                            modifier = Modifier
+                                .fillMaxSize()
+//                                .statusBarsPadding()
+                                .navigationBarsPadding()
+                                .imePadding(),
                             initialColor = if (isBackground) backgroundColorState else savedContentColor,
                             contrastWarning = if (isBackground)
                                 stringResource(R.string.contrast_warning_background)
                             else
                                 stringResource(R.string.contrast_warning_text),
-                            onColorConfirmed = { color ->
-                                val target = colorPickerTarget
-                                colorPickerTarget = null
-                                openedFromContrastDialog = false
-                                colorBeforeContrastFlow = null
-                                when (target) {
-                                    ColorPickerTarget.BACKGROUND -> {
-                                        if (!ContrastUtils.isReadable(savedContentColor, color)) {
-                                            pendingColor = color
-                                            contrastDialogSource = ColorPickerTarget.BACKGROUND
-                                            showContrastDialog = true
-                                        } else {
-                                            onBackgroundColorChange(color)
-                                        }
-                                    }
-                                    ColorPickerTarget.TEXT -> {
-                                        if (!ContrastUtils.isReadable(color, backgroundColorState)) {
-                                            pendingColor = color
-                                            contrastDialogSource = ColorPickerTarget.TEXT
-                                            showContrastDialog = true
-                                        } else {
-                                            onContentColorChange(color)
-                                        }
-                                    }
-                                    null -> {}
-                                }
-                            },
-                            onDismiss = {
-                                colorPickerTarget = null
-                                if (openedFromContrastDialog && colorBeforeContrastFlow != null) {
-                                    when (contrastDialogSource) {
-                                        ColorPickerTarget.BACKGROUND ->
-                                            onBackgroundColorChange(colorBeforeContrastFlow!!)
-                                        ColorPickerTarget.TEXT ->
-                                            onContentColorChange(colorBeforeContrastFlow!!)
-                                        null -> {}
-                                    }
-                                }
-                                openedFromContrastDialog = false
-                                colorBeforeContrastFlow = null
-                                contrastDialogSource = null
-                            }
+                            onColorConfirmed = onColorConfirmedInternal,
+                            onDismiss = onDismissInternal
                         )
                     }
-                    else -> {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(16.dp)
-                        ) {
-                            Text(
-                                text = stringResource(R.string.settings_title),
-                                fontSize = 24.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = contentColor,
-                                modifier = Modifier.padding(bottom = 24.dp)
-                            )
-                            
-                            Text(
-                                text = stringResource(R.string.settings_appearance),
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = contentColor.copy(alpha = 0.6f),
-                                modifier = Modifier.padding(bottom = 8.dp)
-                            )
-
-                            SettingsColorCard(
-                                title = stringResource(R.string.settings_background_color),
-                                subtitle = stringResource(R.string.settings_background_color_desc),
-                                color = backgroundColorState,
-                                onClick = {
-                                    colorPickerTarget = ColorPickerTarget.BACKGROUND
-                                }
-                            )
-                            Spacer(modifier = Modifier.height(12.dp))
-                            SettingsColorCard(
-                                title = stringResource(R.string.settings_content_color),
-                                subtitle = stringResource(R.string.settings_content_color_desc),
-                                color = savedContentColor,
-                                onClick = {
-                                    colorPickerTarget = ColorPickerTarget.TEXT
-                                }
-                            )
-                            
-                            Spacer(modifier = Modifier.height(24.dp))
-                            
-                            Text(
-                                text = stringResource(R.string.settings_about),
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = contentColor.copy(alpha = 0.6f),
-                                modifier = Modifier.padding(bottom = 8.dp)
-                            )
-                            
-                            SettingsActionCard(
-                                title = stringResource(R.string.settings_licenses),
-                                subtitle = stringResource(R.string.settings_licenses_desc),
-                                icon = Icons.Default.Description,
-                                onClick = onNavigateToLicenses
-                            )
-                        }
-                    }
                 }
+                else -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues)
+                            .padding(16.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.settings_title),
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = contentColor,
+                            modifier = Modifier.padding(bottom = 24.dp)
+                        )
+                        
+                        Text(
+                            text = stringResource(R.string.settings_appearance),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = contentColor.copy(alpha = 0.6f),
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
 
-                if (showContrastDialog && pendingColor != null && contrastDialogSource != null) {
-                    val isFromBg = contrastDialogSource == ColorPickerTarget.BACKGROUND
-                    ContrastSuggestionDialog(
-                        backgroundColor = if (isFromBg) pendingColor!! else backgroundColorState,
-                        textColor = if (isFromBg) savedContentColor else pendingColor!!,
-                        isBackgroundChange = isFromBg,
-                        suggestions = if (isFromBg)
-                            ContrastUtils.suggestTextColors(pendingColor!!)
-                        else
-                            ContrastUtils.suggestBackgroundColors(pendingColor!!),
-                        onSuggestionSelected = { suggested ->
-                            if (isFromBg) {
-                                onBackgroundColorChange(pendingColor!!)
-                                onContentColorChange(suggested)
-                            } else {
-                                onContentColorChange(pendingColor!!)
-                                onBackgroundColorChange(suggested)
-                            }
-                            showContrastDialog = false
-                            pendingColor = null
-                            contrastDialogSource = null
-                        },
-                        onOpenColorPicker = {
-                            colorBeforeContrastFlow = if (isFromBg) backgroundColorState else savedContentColor
-                            openedFromContrastDialog = true
-                            if (isFromBg) {
-                                onBackgroundColorChange(pendingColor!!)
-                                colorPickerTarget = ColorPickerTarget.TEXT
-                            } else {
-                                onContentColorChange(pendingColor!!)
+                        SettingsColorCard(
+                            title = stringResource(R.string.settings_background_color),
+                            subtitle = stringResource(R.string.settings_background_color_desc),
+                            color = backgroundColorState,
+                            onClick = {
                                 colorPickerTarget = ColorPickerTarget.BACKGROUND
                             }
-                            showContrastDialog = false
-                            pendingColor = null
-                        },
-                        onKeepAnyway = {
-                            if (isFromBg) {
-                                onBackgroundColorChange(pendingColor!!)
-                            } else {
-                                onContentColorChange(pendingColor!!)
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        SettingsColorCard(
+                            title = stringResource(R.string.settings_content_color),
+                            subtitle = stringResource(R.string.settings_content_color_desc),
+                            color = savedContentColor,
+                            onClick = {
+                                colorPickerTarget = ColorPickerTarget.TEXT
                             }
-                            onShowWarning(backgroundColorState, savedContentColor)
-                            showContrastDialog = false
-                            pendingColor = null
-                            contrastDialogSource = null
-                        },
-                        onDismiss = {
-                            showContrastDialog = false
-                            pendingColor = null
-                            contrastDialogSource = null
-                        }
-                    )
+                        )
+                        
+                        Spacer(modifier = Modifier.height(24.dp))
+                        
+                        Text(
+                            text = stringResource(R.string.settings_about),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = contentColor.copy(alpha = 0.6f),
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                        
+                        SettingsActionCard(
+                            title = stringResource(R.string.settings_licenses),
+                            subtitle = stringResource(R.string.settings_licenses_desc),
+                            icon = Icons.Default.Description,
+                            onClick = onNavigateToLicenses
+                        )
+                    }
                 }
+            }
+
+            if (colorPickerTarget != null && openedFromContrastDialog) {
+                val isBackground = colorPickerTarget == ColorPickerTarget.BACKGROUND
+                Dialog(
+                    onDismissRequest = onDismissInternal,
+                    properties = DialogProperties(
+                        usePlatformDefaultWidth = false,
+                        decorFitsSystemWindows = false
+                    )
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        ColorPickerScreen(
+                            modifier = Modifier
+                                .fillMaxWidth(0.9f)
+                                .clip(RoundedCornerShape(16.dp))
+                                .wrapContentHeight(),
+                            initialColor = if (isBackground) backgroundColorState else savedContentColor,
+                            contrastWarning = if (isBackground)
+                                stringResource(R.string.contrast_warning_background)
+                            else
+                                stringResource(R.string.contrast_warning_text),
+                            onColorConfirmed = onColorConfirmedInternal,
+                            onDismiss = onDismissInternal
+                        )
+                    }
+                }
+            }
+
+            if (showContrastDialog && pendingColor != null && contrastDialogSource != null) {
+                val isFromBg = contrastDialogSource == ColorPickerTarget.BACKGROUND
+                ContrastSuggestionDialog(
+                    backgroundColor = if (isFromBg) pendingColor!! else backgroundColorState,
+                    textColor = if (isFromBg) savedContentColor else pendingColor!!,
+                    isBackgroundChange = isFromBg,
+                    suggestions = if (isFromBg)
+                        ContrastUtils.suggestTextColors(pendingColor!!)
+                    else
+                        ContrastUtils.suggestBackgroundColors(pendingColor!!),
+                    onSuggestionSelected = { suggested ->
+                        if (isFromBg) {
+                            onBackgroundColorChange(pendingColor!!)
+                            onContentColorChange(suggested)
+                        } else {
+                            onContentColorChange(pendingColor!!)
+                            onBackgroundColorChange(suggested)
+                        }
+                        showContrastDialog = false
+                        pendingColor = null
+                        contrastDialogSource = null
+                    },
+                    onOpenColorPicker = {
+                        colorBeforeContrastFlow = if (isFromBg) backgroundColorState else savedContentColor
+                        openedFromContrastDialog = true
+                        if (isFromBg) {
+                            onBackgroundColorChange(pendingColor!!)
+                            colorPickerTarget = ColorPickerTarget.TEXT
+                        } else {
+                            onContentColorChange(pendingColor!!)
+                            colorPickerTarget = ColorPickerTarget.BACKGROUND
+                        }
+                        showContrastDialog = false
+                        pendingColor = null
+                    },
+                    onKeepAnyway = {
+                        if (isFromBg) {
+                            onBackgroundColorChange(pendingColor!!)
+                        } else {
+                            onContentColorChange(pendingColor!!)
+                        }
+                        onShowWarning(backgroundColorState, savedContentColor)
+                        showContrastDialog = false
+                        pendingColor = null
+                        contrastDialogSource = null
+                    },
+                    onDismiss = {
+                        showContrastDialog = false
+                        pendingColor = null
+                        contrastDialogSource = null
+                    }
+                )
             }
         }
     }

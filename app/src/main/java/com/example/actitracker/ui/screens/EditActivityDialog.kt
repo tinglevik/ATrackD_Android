@@ -20,6 +20,8 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -54,6 +56,8 @@ fun EditActivityDialog(
     val showColorPicker = remember { mutableStateOf(false) }
     val showIconPicker = remember { mutableStateOf(false) }
     
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
     val dummyFocusRequester = remember { FocusRequester() }
 
     AlertDialog(
@@ -106,7 +110,11 @@ fun EditActivityDialog(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { showColorPicker.value = true }
+                        .clickable {
+                            focusManager.clearFocus()
+                            keyboardController?.hide()
+                            showColorPicker.value = true
+                        }
                         .padding(vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -125,7 +133,11 @@ fun EditActivityDialog(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { showIconPicker.value = true }
+                        .clickable {
+                            focusManager.clearFocus()
+                            keyboardController?.hide()
+                            showIconPicker.value = true
+                        }
                         .padding(vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -344,9 +356,8 @@ fun EditActivityDialog(
             )
         ) {
             Box(
-                modifier = Modifier
-                    .fillMaxWidth(0.9f)
-                    .clip(RoundedCornerShape(16.dp))
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
             ) {
                 ColorPickerScreen(
                     initialColor = selectedColor,
@@ -354,7 +365,11 @@ fun EditActivityDialog(
                         selectedColor = it
                         showColorPicker.value = false
                     },
-                    onDismiss = { showColorPicker.value = false }
+                    onDismiss = { showColorPicker.value = false },
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .clip(RoundedCornerShape(16.dp))
+                        .wrapContentHeight()
                 )
             }
         }
@@ -370,20 +385,24 @@ fun EditActivityDialog(
             )
         ) {
             Box(
-                modifier = Modifier
-                    .fillMaxWidth(0.9f)
-                    .fillMaxHeight(0.95f)
-                    .imePadding()
-                    .clip(RoundedCornerShape(16.dp))
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
             ) {
-                IconPickerScreen(
-                    initialIconName = selectedIconName,
-                    onIconSelected = {
-                        selectedIconName = it
-                        showIconPicker.value = false
-                    },
-                    onDismiss = { showIconPicker.value = false }
-                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .fillMaxHeight(0.95f)
+                        .clip(RoundedCornerShape(16.dp))
+                ) {
+                    IconPickerScreen(
+                        initialIconName = selectedIconName,
+                        onIconSelected = {
+                            selectedIconName = it
+                            showIconPicker.value = false
+                        },
+                        onDismiss = { showIconPicker.value = false }
+                    )
+                }
             }
         }
     }
