@@ -33,6 +33,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FabPosition
@@ -41,6 +43,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -363,21 +366,53 @@ fun TodayScreen(
                 },
                 onDelete = {},
                 dialogBackgroundColor = contentColor,
-                dialogContentColor = backgroundColor
+                dialogContentColor = backgroundColor,
+                quickPanelCount = activities.count { it.showInQuickPanel }
             )
         }
 
         swipedActivity?.let { activity ->
-            QuickPanelToggleDialog(
-                activity = activity,
-                onDismiss = { swipedActivity = null },
-                onToggle = { updated ->
-                    onQuickPanelToggle(updated)
-                    swipedActivity = null
-                },
-                dialogBackgroundColor = contentColor,
-                dialogContentColor = backgroundColor
-            )
+            val quickPanelCount = activities.count { it.showInQuickPanel }
+            val isAdding = !activity.showInQuickPanel
+
+            if (isAdding && quickPanelCount >= 9) {
+                AlertDialog(
+                    onDismissRequest = { swipedActivity = null },
+                    containerColor = contentColor,
+                    titleContentColor = backgroundColor,
+                    textContentColor = backgroundColor,
+                    title = {
+                        Text(
+                            text = stringResource(R.string.quick_panel_limit_title),
+                            fontWeight = FontWeight.Bold
+                        )
+                    },
+                    text = {
+                        Text(text = stringResource(R.string.quick_panel_limit_message))
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = { swipedActivity = null },
+                            colors = ButtonDefaults.textButtonColors(
+                                contentColor = backgroundColor
+                            )
+                        ) {
+                            Text(stringResource(R.string.ok_button))
+                        }
+                    }
+                )
+            } else {
+                QuickPanelToggleDialog(
+                    activity = activity,
+                    onDismiss = { swipedActivity = null },
+                    onToggle = { updated ->
+                        onQuickPanelToggle(updated)
+                        swipedActivity = null
+                    },
+                    dialogBackgroundColor = contentColor,
+                    dialogContentColor = backgroundColor
+                )
+            }
         }
     }
 }

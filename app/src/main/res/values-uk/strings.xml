@@ -100,6 +100,9 @@
     <string name="quick_panel_remove_desc">Видалити з панелі сповіщень та з екрана блокування?</string>
     <string name="quick_panel_add_button">Додати</string>
     <string name="quick_panel_remove_button">Видалити</string>
+    <string name="quick_panel_limit_title">Ліміт вичерпано</string>
+    <string name="quick_panel_limit_message">У панелі вже є 9/9 активностей. Щоб додати нову, необхідно видалити одну з існуючих.</string>
+    <string name="ok_button">ОК</string>
 
     <!-- Notification Service -->
     <string name="notification_channel_name">Activity Tracker</string>

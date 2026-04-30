@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -43,7 +44,8 @@ fun EditActivityDialog(
     onDelete: () -> Unit,
     isCreating: Boolean = false,
     dialogBackgroundColor: Color = MaterialTheme.colorScheme.surface,
-    dialogContentColor: Color = MaterialTheme.colorScheme.onSurface
+    dialogContentColor: Color = MaterialTheme.colorScheme.onSurface,
+    quickPanelCount: Int = 0
 ) {
     var name by remember { mutableStateOf(activity.name) }
     var selectedColor by remember { mutableStateOf(activity.color) }
@@ -55,6 +57,7 @@ fun EditActivityDialog(
     // State for showing selection dialogs
     val showColorPicker = remember { mutableStateOf(false) }
     val showIconPicker = remember { mutableStateOf(false) }
+    val showLimitWarning = remember { mutableStateOf(false) }
     
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -284,7 +287,13 @@ fun EditActivityDialog(
                     }
                     Switch(
                         checked = showInQuickPanel,
-                        onCheckedChange = { showInQuickPanel = it },
+                        onCheckedChange = { 
+                            if (it && !showInQuickPanel && quickPanelCount >= 9) {
+                                showLimitWarning.value = true
+                            } else {
+                                showInQuickPanel = it 
+                            }
+                        },
                         colors = SwitchDefaults.colors(
                             checkedThumbColor = dialogBackgroundColor,
                             checkedTrackColor = dialogContentColor,
@@ -405,6 +414,34 @@ fun EditActivityDialog(
                 }
             }
         }
+    }
+
+    if (showLimitWarning.value) {
+        AlertDialog(
+            onDismissRequest = { showLimitWarning.value = false },
+            containerColor = dialogContentColor,
+            titleContentColor = dialogBackgroundColor,
+            textContentColor = dialogBackgroundColor,
+            title = {
+                Text(
+                    text = stringResource(R.string.quick_panel_limit_title),
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text(text = stringResource(R.string.quick_panel_limit_message))
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = { showLimitWarning.value = false },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = dialogBackgroundColor
+                    )
+                ) {
+                    Text(stringResource(R.string.ok_button))
+                }
+            }
+        )
     }
 
     LaunchedEffect(Unit) {

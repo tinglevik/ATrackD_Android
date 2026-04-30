@@ -100,6 +100,9 @@
     <string name="quick_panel_remove_desc">¿Eliminar del panel de notificaciones y pantalla de bloqueo?</string>
     <string name="quick_panel_add_button">Añadir</string>
     <string name="quick_panel_remove_button">Eliminar</string>
+    <string name="quick_panel_limit_title">Límite alcanzado</string>
+    <string name="quick_panel_limit_message">Ya hay 9/9 actividades en el panel. Para añadir una nueva, debe eliminar una de las existentes.</string>
+    <string name="ok_button">Aceptar</string>
 
     <!-- Notification Service -->
     <string name="notification_channel_name">Activity Tracker</string>

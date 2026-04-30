@@ -352,7 +352,8 @@ fun ManageActivitiesScreen(
                     onSave = { onActivityCreate(it); showCreateDialog = false },
                     onDelete = {},
                     dialogBackgroundColor = contentColor,
-                    dialogContentColor = backgroundColor
+                    dialogContentColor = backgroundColor,
+                    quickPanelCount = activities.count { it.showInQuickPanel }
                 )
                 ManageTab.TAGS -> EditTagDialog(
                     tag = TagItem(-1, "", Color.Cyan),
@@ -386,7 +387,8 @@ fun ManageActivitiesScreen(
                         onSave = { onActivityUpdate(it); editingActivity = null },
                         onDelete = { itemToDeleteId = activity.id; showDeleteConfirm = true },
                         dialogBackgroundColor = contentColor,
-                        dialogContentColor = backgroundColor
+                        dialogContentColor = backgroundColor,
+                        quickPanelCount = activities.count { it.showInQuickPanel }
                     )
                 }
             }
