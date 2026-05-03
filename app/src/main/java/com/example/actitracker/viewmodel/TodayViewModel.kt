@@ -79,8 +79,8 @@ class TodayViewModel(
             }.collect { filtered ->
                 val today = _startOfToday.value
                 val current = _firstStartTimes.value
-                // Объединяем данные из хранилища с локально установленными (например, полночь для активной задачи)
-                // чтобы избежать мерцания или потери данных при переходе суток
+                // Combine data from the storage with locally set ones (e.g., midnight for the active task)
+                // to avoid flickering or data loss when transitioning between days
                 _firstStartTimes.value = filtered + current.filter { it.value >= today }
             }
         }
@@ -110,14 +110,14 @@ class TodayViewModel(
 
                     entities.map { entity ->
                         val sessions = todaySessions.filter { it.activityId == entity.id }
-                        // Сумма завершенных сегодня частей сессий
+                        // Sum of session parts completed today
                         var totalSecondsToday = sessions.sumOf { session ->
                             val start = maxOf(session.startTime, startOfToday)
                             val end = session.endTime ?: return@sumOf 0L
                             if (end > start) (end - start) / 1000 else 0L
                         }
 
-                        // Если это активная задача, добавляем время текущей сессии с начала дня
+                        // If this is an active task, add the current session time from the start of the day
                         if (entity.id == activeId && activeStartTime != null) {
                             val effectiveStart = maxOf(activeStartTime, startOfToday)
                             if (ticker > effectiveStart) {
@@ -125,10 +125,10 @@ class TodayViewModel(
                             }
                         }
 
-                        // Определяем метку времени старта для отображения "Started at"
+                        // Determine the start timestamp for displaying "Started at"
                         var firstStart = firstStarts[entity.id]
                         if (entity.id == activeId && activeStartTime != null && activeStartTime < startOfToday) {
-                            // Если задача перешла с прошлого дня, для текущего дня она "стартовала" в полночь
+                            // If the task carried over from the previous day, it "started" at midnight for the current day
                             firstStart = startOfToday
                         }
 
@@ -178,7 +178,7 @@ class TodayViewModel(
                     _startOfToday.value = currentStart
                     _firstStartTimes.value = newStarts
                     
-                    // Сохраняем в хранилище асинхронно
+                    // Save to storage asynchronously
                     viewModelScope.launch {
                         updateFirstStartTimes(newStarts)
                     }
