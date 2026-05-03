@@ -8,6 +8,7 @@ import com.example.actitracker.data.model.ActivityItem
 import com.example.actitracker.data.model.GoalItem
 import com.example.actitracker.data.model.TagItem
 import com.example.actitracker.data.repository.ActivityRepository
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -85,6 +86,7 @@ class TodayViewModel(
         }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun observeActivitiesWithSessions() {
         viewModelScope.launch {
             _startOfToday.flatMapLatest { startOfToday ->
@@ -96,8 +98,11 @@ class TodayViewModel(
                     _activeActivityId,
                     _activeStartTime
                 ) { flows ->
+                    @Suppress("UNCHECKED_CAST")
                     val entities = flows[0] as List<ActivityEntity>
+                    @Suppress("UNCHECKED_CAST")
                     val todaySessions = flows[1] as List<ActivityLogEntity>
+                    @Suppress("UNCHECKED_CAST")
                     val firstStarts = flows[2] as Map<Long, Long>
                     val ticker = flows[3] as Long
                     val activeId = flows[4] as Long?
