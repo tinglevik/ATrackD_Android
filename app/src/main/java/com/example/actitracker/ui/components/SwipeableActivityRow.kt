@@ -43,8 +43,6 @@ import java.util.Date
 fun SwipeableActivityRow(
     activity: ActivityItem,
     isActive: Boolean,
-    currentTime: Long,
-    activeStartTime: Long?,
     backgroundColor: Color = MaterialTheme.colorScheme.background,
     contentColor: Color = MaterialTheme.colorScheme.onBackground,
     onClick: () -> Unit,
@@ -58,16 +56,6 @@ fun SwipeableActivityRow(
             android.icu.text.DateFormat.SHORT,
             locale
         )
-    }
-
-    val liveSeconds = remember(
-        activity.elapsedSeconds, isActive, currentTime, activeStartTime
-    ) {
-        if (isActive && activeStartTime != null) {
-            activity.elapsedSeconds + (currentTime - activeStartTime) / 1000
-        } else {
-            activity.elapsedSeconds
-        }
     }
 
     val dismissState = rememberSwipeToDismissBoxState()
@@ -162,9 +150,9 @@ fun SwipeableActivityRow(
                     }
 
 
-                    if (isActive || liveSeconds > 0) {
+                    if (isActive || activity.elapsedSeconds > 0) {
                         Text(
-                            text = formatSeconds(liveSeconds),
+                            text = formatSeconds(activity.elapsedSeconds),
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Medium,
                             color = contentColor
@@ -199,8 +187,6 @@ fun SwipeableActivityRowPreview() {
         SwipeableActivityRow(
             activity = sampleActivity,
             isActive = true,
-            currentTime = System.currentTimeMillis(),
-            activeStartTime = System.currentTimeMillis() - 120_000, // +2 min
             onClick = {},
             onSwipe = {}
         )

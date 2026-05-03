@@ -29,6 +29,8 @@ class TodayViewModel(
     private val _ticker = MutableStateFlow(System.currentTimeMillis())
     val ticker: StateFlow<Long> = _ticker
 
+    private val _startOfToday = MutableStateFlow(getStartOfToday())
+
     private val _firstStartTimes = MutableStateFlow<Map<Long, Long>>(emptyMap())
 
     val activities: StateFlow<List<ActivityItem>> =
@@ -55,7 +57,6 @@ class TodayViewModel(
         observeActiveSession()
         observeFirstStartTimes()
         observeActivitiesWithSessions()
-        resetFirstStartTimeAtDayEnd()
     }
 
     private fun observeActiveSession() {
@@ -69,40 +70,76 @@ class TodayViewModel(
 
     private fun observeFirstStartTimes() {
         viewModelScope.launch {
-            val today = getStartOfToday()
-            settingsDataStore.firstStartTimesFlow.collect { savedStarts ->
-                _firstStartTimes.value = savedStarts.filter { it.value >= today }
+            combine(
+                settingsDataStore.firstStartTimesFlow,
+                _startOfToday
+            ) { savedStarts, today ->
+                savedStarts.filter { it.value >= today }
+            }.collect { filtered ->
+                val today = _startOfToday.value
+                val current = _firstStartTimes.value
+                // Объединяем данные из хранилища с локально установленными (например, полночь для активной задачи)
+                // чтобы избежать мерцания или потери данных при переходе суток
+                _firstStartTimes.value = filtered + current.filter { it.value >= today }
             }
         }
     }
 
     private fun observeActivitiesWithSessions() {
-        val startOfToday = getStartOfToday()
-
         viewModelScope.launch {
-            combine(
-                repository.getActivities(),
-                repository.getSessionsFromFlow(startOfToday),
-                _firstStartTimes
-            ) { entities, todaySessions, firstStarts ->
-                entities.map { entity ->
-                    val sessions = todaySessions.filter { it.activityId == entity.id }
-                    val completedSeconds = sessions.sumOf { session ->
-                        session.endTime?.let { end -> (end - session.startTime) / 1000 } ?: 0L
-                    }
+            _startOfToday.flatMapLatest { startOfToday ->
+                combine(
+                    repository.getActivities(),
+                    repository.getSessionsFromFlow(startOfToday),
+                    _firstStartTimes,
+                    _ticker,
+                    _activeActivityId,
+                    _activeStartTime
+                ) { flows ->
+                    val entities = flows[0] as List<ActivityEntity>
+                    val todaySessions = flows[1] as List<ActivityLogEntity>
+                    val firstStarts = flows[2] as Map<Long, Long>
+                    val ticker = flows[3] as Long
+                    val activeId = flows[4] as Long?
+                    val activeStartTime = flows[5] as Long?
 
-                    ActivityItem(
-                        id = entity.id,
-                        name = entity.name,
-                        color = Color(entity.color.toULong()),
-                        icon = entity.icon,
-                        elapsedSeconds = completedSeconds,
-                        history = emptyMap(),
-                        firstStartDayTime = firstStarts[entity.id],
-                        showInQuickPanel = entity.showInQuickPanel,
-                        tagIds = entity.tagIds,
-                        sortOrder = entity.sortOrder
-                    )
+                    entities.map { entity ->
+                        val sessions = todaySessions.filter { it.activityId == entity.id }
+                        // Сумма завершенных сегодня частей сессий
+                        var totalSecondsToday = sessions.sumOf { session ->
+                            val start = maxOf(session.startTime, startOfToday)
+                            val end = session.endTime ?: return@sumOf 0L
+                            if (end > start) (end - start) / 1000 else 0L
+                        }
+
+                        // Если это активная задача, добавляем время текущей сессии с начала дня
+                        if (entity.id == activeId && activeStartTime != null) {
+                            val effectiveStart = maxOf(activeStartTime, startOfToday)
+                            if (ticker > effectiveStart) {
+                                totalSecondsToday += (ticker - effectiveStart) / 1000
+                            }
+                        }
+
+                        // Определяем метку времени старта для отображения "Started at"
+                        var firstStart = firstStarts[entity.id]
+                        if (entity.id == activeId && activeStartTime != null && activeStartTime < startOfToday) {
+                            // Если задача перешла с прошлого дня, для текущего дня она "стартовала" в полночь
+                            firstStart = startOfToday
+                        }
+
+                        ActivityItem(
+                            id = entity.id,
+                            name = entity.name,
+                            color = Color(entity.color.toULong()),
+                            icon = entity.icon,
+                            elapsedSeconds = totalSecondsToday,
+                            history = emptyMap(),
+                            firstStartDayTime = firstStart,
+                            showInQuickPanel = entity.showInQuickPanel,
+                            tagIds = entity.tagIds,
+                            sortOrder = entity.sortOrder
+                        )
+                    }
                 }
             }.collect { items ->
                 _activitiesWithStats.value = items
@@ -119,27 +156,29 @@ class TodayViewModel(
         }.timeInMillis
     }
 
-    private fun resetFirstStartTimeAtDayEnd() {
+    private fun startTicker() {
         viewModelScope.launch {
             tickerFlow(1000).collect { now ->
-                val calendar = Calendar.getInstance().apply { timeInMillis = now }
-                val hour = calendar.get(Calendar.HOUR_OF_DAY)
-                val minute = calendar.get(Calendar.MINUTE)
-                val second = calendar.get(Calendar.SECOND)
-                if (hour == 0 && minute == 0 && second < 2) {
-                    val current = _firstStartTimes.value
-                    if (current.isNotEmpty()) {
-                        val filtered = current.filter { (_, time) -> isSameDay(time, now) }
-                        updateFirstStartTimes(filtered)
+                _ticker.value = now
+                val currentStart = getStartOfToday()
+                if (currentStart != _startOfToday.value) {
+                    val activeId = _activeActivityId.value
+                    val currentStarts = _firstStartTimes.value
+                    val newStarts = currentStarts.filter { it.value >= currentStart }.toMutableMap()
+                    
+                    if (activeId != null) {
+                        newStarts[activeId] = currentStart
+                    }
+
+                    _startOfToday.value = currentStart
+                    _firstStartTimes.value = newStarts
+                    
+                    // Сохраняем в хранилище асинхронно
+                    viewModelScope.launch {
+                        updateFirstStartTimes(newStarts)
                     }
                 }
             }
-        }
-    }
-
-    private fun startTicker() {
-        viewModelScope.launch {
-            tickerFlow(1000).collect { _ticker.value = it }
         }
     }
 

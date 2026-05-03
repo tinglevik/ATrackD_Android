@@ -55,8 +55,6 @@ import kotlin.math.roundToInt
 fun ActivityRow(
     activity: ActivityItem,
     isActive: Boolean,
-    currentTime: Long,
-    activeStartTime: Long?,
     allTags: List<TagItem> = emptyList(),
     contentColor: Color = LocalContentColor.current,
     showTimer: Boolean = true,
@@ -68,16 +66,6 @@ fun ActivityRow(
 
     val timeFormatter = remember(locale) {
         android.icu.text.DateFormat.getTimeInstance(android.icu.text.DateFormat.SHORT, locale)
-    }
-
-    val liveSeconds = remember(
-        activity.elapsedSeconds, isActive, currentTime, activeStartTime
-    ) {
-        if (isActive && activeStartTime != null) {
-            activity.elapsedSeconds + (currentTime - activeStartTime) / 1000
-        } else {
-            activity.elapsedSeconds
-        }
     }
 
     val activityTags = remember(activity.tagIds, allTags) {
@@ -158,9 +146,9 @@ fun ActivityRow(
                 )
 
                 // ⏱️ Timer
-                if (showTimer && (isActive || liveSeconds > 0)) {
+                if (showTimer && (isActive || activity.elapsedSeconds > 0)) {
                     Text(
-                        text = formatSeconds(liveSeconds),
+                        text = formatSeconds(activity.elapsedSeconds),
                         fontSize = ActivityRowDimens.headerFontSize,
                         fontWeight = FontWeight.Medium,
                         color = contentColor
@@ -372,8 +360,6 @@ fun ActivityRowPreview() {
     ActivityRow(
         activity = sampleActivity,
         isActive = true,
-        currentTime = System.currentTimeMillis(),
-        activeStartTime = System.currentTimeMillis() - 120_000, // +2 min
         allTags = sampleTags,
         showTimer = true,
         showFirstStart = true,

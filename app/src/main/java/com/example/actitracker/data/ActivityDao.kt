@@ -90,7 +90,7 @@ interface ActivityDao {
     @Update
     suspend fun updateSession(session: ActivityLogEntity)
 
-    @Query("SELECT * FROM activity_log WHERE startTime >= :from AND startTime <= :to")
+    @Query("SELECT * FROM activity_log WHERE (startTime <= :to AND (endTime IS NULL OR endTime >= :from))")
     suspend fun getAllSessionsInInterval(from: Long, to: Long): List<ActivityLogEntity>
 
     @Query("""
@@ -121,7 +121,7 @@ interface ActivityDao {
 
     @Query("""
         SELECT * FROM activity_log
-        WHERE startTime >= :from
+        WHERE (endTime IS NULL OR endTime >= :from)
         ORDER BY startTime DESC
     """)
     fun getSessionsFromFlow(from: Long): Flow<List<ActivityLogEntity>>

@@ -80,8 +80,6 @@ class ReportViewModel(
                 _dateOffset
             ) { args ->
                 val base = args[0] as BaseReportData
-                val activeId = args[1] as Long?
-                val activeTime = args[2] as Long?
                 val currentTime = args[3] as Long
                 val mode = args[4] as ReportMode
                 val period = args[5] as ReportPeriod
@@ -92,7 +90,7 @@ class ReportViewModel(
                 computeStatsSync(
                     base.activities, base.tags, base.sessions, 
                     from, to,
-                    activeId, activeTime, currentTime, mode
+                    currentTime, mode
                 )
             }.collect { result ->
                 _statsData.value = result
@@ -118,8 +116,6 @@ class ReportViewModel(
         allSessions: List<ActivityLogEntity>,
         from: Long,
         to: Long,
-        activeActivityId: Long?,
-        activeStartTime: Long?,
         currentTime: Long,
         mode: ReportMode
     ): ReportStats {
@@ -132,14 +128,10 @@ class ReportViewModel(
         if (mode == ReportMode.ACTIVITIES) {
             for (activity in activities) {
                 val sessions = sessionsByActivity[activity.id] ?: emptyList()
-                var activitySeconds = sessions.sumOf { session ->
-                    val endTime = session.endTime ?: return@sumOf 0L
-                    (endTime - session.startTime) / 1000
-                }
-
-                if (activity.id == activeActivityId && activeStartTime != null &&
-                    activeStartTime >= from && activeStartTime <= to) {
-                    activitySeconds += (currentTime - activeStartTime) / 1000
+                val activitySeconds = sessions.sumOf { session ->
+                    val start = maxOf(session.startTime, from)
+                    val end = minOf(session.endTime ?: currentTime, to)
+                    if (end > start) (end - start) / 1000 else 0L
                 }
 
                 if (activitySeconds > 0) {
@@ -154,14 +146,10 @@ class ReportViewModel(
 
             for (activity in activities) {
                 val sessions = sessionsByActivity[activity.id] ?: emptyList()
-                var activitySeconds = sessions.sumOf { session ->
-                    val endTime = session.endTime ?: return@sumOf 0L
-                    (endTime - session.startTime) / 1000
-                }
-
-                if (activity.id == activeActivityId && activeStartTime != null &&
-                    activeStartTime >= from && activeStartTime <= to) {
-                    activitySeconds += (currentTime - activeStartTime) / 1000
+                val activitySeconds = sessions.sumOf { session ->
+                    val start = maxOf(session.startTime, from)
+                    val end = minOf(session.endTime ?: currentTime, to)
+                    if (end > start) (end - start) / 1000 else 0L
                 }
 
                 if (activitySeconds > 0) {

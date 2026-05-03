@@ -241,8 +241,6 @@ fun ManageActivitiesScreen(
                         ActivityRow(
                             activity = activity,
                             isActive = false,
-                            currentTime = 0L,
-                            activeStartTime = null,
                             allTags = tags,
                             contentColor = contentColor,
                             showTimer = false,

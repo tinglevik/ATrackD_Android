@@ -108,7 +108,6 @@ class MainActivity : ComponentActivity() {
 
                 val isCreating by todayViewModel.isCreating.collectAsState()
                 val activeActivityId by todayViewModel.activeActivityId.collectAsState()
-                val activeStartTime by todayViewModel.activeStartTime.collectAsState()
 
                 val reportViewModel: ReportViewModel = viewModel(
                     factory = ReportViewModelFactory(
@@ -166,7 +165,6 @@ class MainActivity : ComponentActivity() {
                                     TodayScreen(
                                         activities = activities,
                                         activeActivityId = activeActivityId,
-                                        activeStartTime = activeStartTime,
                                         ticker = ticker,
                                         onStartActivity = { todayViewModel.startActivity(it) },
                                         onStopActivity = { todayViewModel.stopActivity(it) },

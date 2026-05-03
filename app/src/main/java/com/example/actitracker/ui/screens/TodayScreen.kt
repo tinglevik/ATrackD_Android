@@ -85,7 +85,6 @@ import java.util.Date
 fun TodayScreen(
     activities: List<ActivityItem>,
     activeActivityId: Long?,
-    activeStartTime: Long?,
     ticker: Long,
     onStartActivity: (Long) -> Unit,
     onStopActivity: (Long) -> Unit,
@@ -180,8 +179,6 @@ fun TodayScreen(
             // 2) Block: Current task
             CurrentTaskBlock(
                 activeActivities = activeActivities,
-                ticker = ticker,
-                activeStartTime = activeStartTime,
                 contentColor = contentColor,
                 onStopActivity = onStopActivity
             )
@@ -297,8 +294,6 @@ fun TodayScreen(
                         SwipeableActivityRow(
                             activity = activity,
                             isActive = activity.id == activeActivityId,
-                            currentTime = ticker,
-                            activeStartTime = activeStartTime,
                             backgroundColor = backgroundColor,
                             contentColor = contentColor,
                             onClick = {
@@ -327,8 +322,6 @@ fun TodayScreen(
                     SwipeableActivityRow(
                         activity = activity,
                         isActive = activity.id == activeActivityId,
-                        currentTime = ticker,
-                        activeStartTime = activeStartTime,
                         backgroundColor = backgroundColor,
                         contentColor = contentColor,
                         onClick = {
@@ -563,8 +556,6 @@ private fun SearchBox(
 @Composable
 private fun CurrentTaskBlock(
     activeActivities: List<ActivityItem>,
-    ticker: Long,
-    activeStartTime: Long?,
     contentColor: Color,
     onStopActivity: (Long) -> Unit
 ) {
@@ -628,12 +619,6 @@ private fun CurrentTaskBlock(
                             .padding(ActivityRowDimens.currentTaskPadding)
                     ) {
                         currentActiveList.forEach { activity ->
-                            val liveSeconds = if (activeStartTime != null) {
-                                activity.elapsedSeconds + (ticker - activeStartTime) / 1000
-                            } else {
-                                activity.elapsedSeconds
-                            }
-
                             Row(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
@@ -667,7 +652,7 @@ private fun CurrentTaskBlock(
                                 )
 
                                 Text(
-                                    text = formatSeconds(liveSeconds),
+                                    text = formatSeconds(activity.elapsedSeconds),
                                     color = contentColor,
                                     fontSize = ActivityRowDimens.headerFontSize
                                 )
@@ -735,7 +720,6 @@ fun TodayScreenPreview() {
     TodayScreen(
         activities = activities,
         activeActivityId = 1,
-        activeStartTime = now - 60_000,
         ticker = now,
         onStartActivity = {},
         onStopActivity = {},
