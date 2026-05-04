@@ -242,6 +242,7 @@ fun ManageActivitiesScreen(
                             activity = activity,
                             isActive = false,
                             allTags = tags,
+                            backgroundColor = backgroundColor,
                             contentColor = contentColor,
                             showTimer = false,
                             showFirstStart = false,
@@ -261,7 +262,11 @@ fun ManageActivitiesScreen(
                             .fillMaxSize()
                             .verticalScrollbar(tagsListState)
                     ) { tag, _ ->
-                        Column(modifier = Modifier.fillMaxWidth()) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(backgroundColor)
+                        ) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()

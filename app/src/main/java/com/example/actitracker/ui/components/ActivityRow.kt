@@ -56,6 +56,7 @@ fun ActivityRow(
     activity: ActivityItem,
     isActive: Boolean,
     allTags: List<TagItem> = emptyList(),
+    backgroundColor: Color = Color.Transparent,
     contentColor: Color = LocalContentColor.current,
     showTimer: Boolean = true,
     showFirstStart: Boolean = true,
@@ -72,7 +73,11 @@ fun ActivityRow(
         activity.tagIds.mapNotNull { id -> allTags.find { it.id == id } }
     }
 
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(backgroundColor)
+    ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
