@@ -146,7 +146,9 @@ fun SettingsScreenContent(
                             else
                                 stringResource(R.string.contrast_warning_text),
                             onColorConfirmed = onColorConfirmedInternal,
-                            onDismiss = onDismissInternal
+                            onDismiss = onDismissInternal,
+                            backgroundColor = MaterialTheme.colorScheme.background,
+                            contentColor = MaterialTheme.colorScheme.onBackground
                         )
                     }
                 }
@@ -235,7 +237,9 @@ fun SettingsScreenContent(
                             else
                                 stringResource(R.string.contrast_warning_text),
                             onColorConfirmed = onColorConfirmedInternal,
-                            onDismiss = onDismissInternal
+                            onDismiss = onDismissInternal,
+                            backgroundColor = backgroundColorState,
+                            contentColor = savedContentColor
                         )
                     }
                 }

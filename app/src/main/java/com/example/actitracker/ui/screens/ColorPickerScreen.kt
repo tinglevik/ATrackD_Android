@@ -23,6 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -80,7 +81,9 @@ fun ColorPickerScreen(
     onColorConfirmed: (Color) -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
-    contrastWarning: String? = null
+    contrastWarning: String? = null,
+    backgroundColor: Color = MaterialTheme.colorScheme.background,
+    contentColor: Color = MaterialTheme.colorScheme.onBackground
 ) {
     val initialHsv = remember(initialColor) {
         val hsv = FloatArray(3)
@@ -116,192 +119,214 @@ fun ColorPickerScreen(
     val dummyFocusRequester = remember { FocusRequester() }
     val scrollState = rememberScrollState()
 
-    Column(
-        modifier = modifier
-            .background(MaterialTheme.colorScheme.background)
-            .verticalScroll(scrollState)
-            .padding(horizontal = 16.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .size(0.dp)
-                .focusRequester(dummyFocusRequester)
-                .focusable()
-        )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+    androidx.compose.runtime.CompositionLocalProvider(androidx.compose.material3.LocalContentColor provides contentColor) {
+        Column(
+            modifier = modifier
+                .background(backgroundColor)
+                .verticalScroll(scrollState)
+                .padding(horizontal = 16.dp)
         ) {
-            IconButton(onClick = onDismiss) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_close),
-                    contentDescription = stringResource(R.string.cancel_button),
-                    tint = Color.Red,
-                    modifier = Modifier.size(32.dp)
-                )
-            }
-
-            Text(
-                text = stringResource(R.string.color_picker_title),
-                fontSize = 20.sp,
-                style = MaterialTheme.typography.titleMedium
+            Box(
+                modifier = Modifier
+                    .size(0.dp)
+                    .focusRequester(dummyFocusRequester)
+                    .focusable()
             )
 
-            IconButton(onClick = { onColorConfirmed(selectedColor) }) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_check),
-                    contentDescription = stringResource(R.string.color_picker_confirm),
-                    tint = Color(0xFF4CAF50),
-                    modifier = Modifier.size(32.dp)
-                )
-            }
-        }
-
-        if (contrastWarning != null) {
-            Surface(
-                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
-                shape = RoundedCornerShape(8.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    modifier = Modifier.padding(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                IconButton(onClick = onDismiss) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_info_outline),
-                        contentDescription = stringResource(R.string.info_desc),
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(20.dp)
+                        painter = painterResource(R.drawable.ic_close),
+                        contentDescription = stringResource(R.string.cancel_button),
+                        tint = Color.Red,
+                        modifier = Modifier.size(32.dp)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = contrastWarning,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontSize = 13.sp
+                }
+
+                Text(
+                    text = stringResource(R.string.color_picker_title),
+                    fontSize = 20.sp,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = contentColor
+                )
+
+                IconButton(onClick = { onColorConfirmed(selectedColor) }) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_check),
+                        contentDescription = stringResource(R.string.color_picker_confirm),
+                        tint = Color(0xFF4CAF50),
+                        modifier = Modifier.size(32.dp)
                     )
                 }
             }
-        }
+
+            if (contrastWarning != null) {
+                Surface(
+                    color = contentColor.copy(alpha = 0.08f),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_info_outline),
+                            contentDescription = stringResource(R.string.info_desc),
+                            tint = contentColor,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = contrastWarning,
+                            color = contentColor,
+                            fontSize = 13.sp
+                        )
+                    }
+                }
+            }
 
 //        Spacer(modifier = Modifier.height(8.dp))
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Text(
-                stringResource(R.string.color_picker_current),
-                modifier = Modifier.padding(end = 8.dp)
-            )
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(initialColor)
-                    .border(2.dp, Color.Gray, CircleShape)
-            )
-
-            Spacer(modifier = Modifier.width(24.dp))
-
-            Text(stringResource(R.string.color_picker_new), modifier = Modifier.padding(end = 8.dp))
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(selectedColor)
-                    .border(2.dp, Color.Gray, CircleShape)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        SaturationValuePanel(
-            hue = hue,
-            saturation = saturation,
-            value = value,
-            onSaturationValueChanged = { s, v ->
-                saturation = s
-                value = v
-                hexInput = colorToHex(
-                    Color(android.graphics.Color.HSVToColor(floatArrayOf(hue, s, v)))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    stringResource(R.string.color_picker_current),
+                    modifier = Modifier.padding(end = 8.dp),
+                    color = contentColor
                 )
-                hexError = false
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(250.dp)
-                .clip(RoundedCornerShape(8.dp))
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        HueBar(
-            hue = hue,
-            onHueChanged = { h ->
-                hue = h
-                hexInput = colorToHex(
-                    Color(android.graphics.Color.HSVToColor(floatArrayOf(h, saturation, value)))
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(initialColor)
+                        .border(2.dp, Color.Gray, CircleShape)
                 )
-                hexError = false
+
+                Spacer(modifier = Modifier.width(24.dp))
+
+                Text(
+                    stringResource(R.string.color_picker_new),
+                    modifier = Modifier.padding(end = 8.dp),
+                    color = contentColor
+                )
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(selectedColor)
+                        .border(2.dp, Color.Gray, CircleShape)
+                )
             }
-        )
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-        OutlinedTextField(
-            value = hexInput,
-            onValueChange = { input: String ->
-                hexInput = input
-                hexError = false
-
-                val parsed = parseHexColor(input)
-                if (parsed != null) {
-                    val hsv = FloatArray(3)
-                    android.graphics.Color.colorToHSV(parsed.toArgbInt(), hsv)
-                    hue = hsv[0]
-                    saturation = hsv[1]
-                    value = hsv[2]
-                }
-            },
-            label = { Text(stringResource(R.string.color_picker_hex_label)) },
-            placeholder = { Text("#FF5722") },
-            isError = hexError,
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(
-                capitalization = KeyboardCapitalization.Characters,
-                imeAction = ImeAction.Done
-            ),
-            keyboardActions = KeyboardActions(
-                onDone = {
-                    keyboardController?.hide()
-                    focusManager.clearFocus()
-                    // Shift focus to an invisible element
-                    dummyFocusRequester.requestFocus()
-
-                    val parsed = parseHexColor(hexInput)
-                    if (parsed == null) {
-                        hexError = true
-                    }
-                }
-            ),
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        if (hexError) {
-            Text(
-                stringResource(R.string.color_picker_hex_error),
-                color = MaterialTheme.colorScheme.error,
-                fontSize = 12.sp,
-                modifier = Modifier.padding(top = 4.dp)
+            SaturationValuePanel(
+                hue = hue,
+                saturation = saturation,
+                value = value,
+                onSaturationValueChanged = { s, v ->
+                    saturation = s
+                    value = v
+                    hexInput = colorToHex(
+                        Color(android.graphics.Color.HSVToColor(floatArrayOf(hue, s, v)))
+                    )
+                    hexError = false
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(250.dp)
+                    .clip(RoundedCornerShape(8.dp))
             )
-        }
 
-        Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+
+            HueBar(
+                hue = hue,
+                onHueChanged = { h ->
+                    hue = h
+                    hexInput = colorToHex(
+                        Color(android.graphics.Color.HSVToColor(floatArrayOf(h, saturation, value)))
+                    )
+                    hexError = false
+                }
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = hexInput,
+                onValueChange = { input: String ->
+                    hexInput = input
+                    hexError = false
+
+                    val parsed = parseHexColor(input)
+                    if (parsed != null) {
+                        val hsv = FloatArray(3)
+                        android.graphics.Color.colorToHSV(parsed.toArgbInt(), hsv)
+                        hue = hsv[0]
+                        saturation = hsv[1]
+                        value = hsv[2]
+                    }
+                },
+                label = {
+                    Text(
+                        stringResource(R.string.color_picker_hex_label),
+                        color = contentColor.copy(alpha = 0.7f)
+                    )
+                },
+                placeholder = { Text("#FF5722", color = contentColor.copy(alpha = 0.5f)) },
+                isError = hexError,
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Characters,
+                    imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        keyboardController?.hide()
+                        focusManager.clearFocus()
+                        // Shift focus to an invisible element
+                        dummyFocusRequester.requestFocus()
+
+                        val parsed = parseHexColor(hexInput)
+                        if (parsed == null) {
+                            hexError = true
+                        }
+                    }
+                ),
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = contentColor,
+                    unfocusedTextColor = contentColor,
+                    focusedBorderColor = contentColor,
+                    unfocusedBorderColor = contentColor.copy(alpha = 0.5f),
+                    cursorColor = contentColor,
+                    errorBorderColor = MaterialTheme.colorScheme.error,
+                    errorTextColor = contentColor
+                )
+            )
+
+            if (hexError) {
+                Text(
+                    stringResource(R.string.color_picker_hex_error),
+                    color = MaterialTheme.colorScheme.error,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+        }
     }
 
     LaunchedEffect(Unit) {
