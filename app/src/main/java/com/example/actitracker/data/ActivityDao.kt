@@ -84,6 +84,9 @@ interface ActivityDao {
     @Query("SELECT * FROM activity_log WHERE activityId = :activityId")
     suspend fun getSessions(activityId: Long): List<ActivityLogEntity>
 
+    @Query("SELECT * FROM activity_log")
+    suspend fun getAllSessions(): List<ActivityLogEntity>
+
     @Insert
     suspend fun insertSession(session: ActivityLogEntity)
 

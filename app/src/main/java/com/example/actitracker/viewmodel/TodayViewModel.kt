@@ -54,6 +54,9 @@ class TodayViewModel(
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     init {
+        viewModelScope.launch {
+            repository.sanitizeTimestamps()
+        }
         startTicker()
         observeActiveSession()
         observeFirstStartTimes()
@@ -110,16 +113,19 @@ class TodayViewModel(
 
                     entities.map { entity ->
                         val sessions = todaySessions.filter { it.activityId == entity.id }
-                        // Sum of session parts completed today
+                        // Суммируем только ЗАВЕРШЕННЫЕ сегодня части сессий
                         var totalSecondsToday = sessions.sumOf { session ->
+                            val endTime = session.endTime ?: return@sumOf 0L 
                             val start = maxOf(session.startTime, startOfToday)
-                            val end = session.endTime ?: return@sumOf 0L
-                            if (end > start) (end - start) / 1000 else 0L
+                            // Дополнительная защита: если данные еще не санированы, ограничиваем тикером
+                            val effectiveEnd = minOf(endTime, ticker)
+                            if (effectiveEnd > start) (effectiveEnd - start) / 1000 else 0L
                         }
 
-                        // If this is an active task, add the current session time from the start of the day
+                        // Добавляем время только для ОФИЦИАЛЬНО активной задачи
                         if (entity.id == activeId && activeStartTime != null) {
                             val effectiveStart = maxOf(activeStartTime, startOfToday)
+                            // Здесь ticker уместен, так как задача реально запущена
                             if (ticker > effectiveStart) {
                                 totalSecondsToday += (ticker - effectiveStart) / 1000
                             }

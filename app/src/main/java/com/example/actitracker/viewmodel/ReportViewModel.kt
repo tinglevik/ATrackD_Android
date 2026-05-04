@@ -130,7 +130,16 @@ class ReportViewModel(
                 val sessions = sessionsByActivity[activity.id] ?: emptyList()
                 val activitySeconds = sessions.sumOf { session ->
                     val start = maxOf(session.startTime, from)
-                    val end = minOf(session.endTime ?: currentTime, to)
+                    val endTime = session.endTime
+                    
+                    val end = if (endTime != null) {
+                        // Для завершенных сессий используем их endTime, ограничивая только концом периода
+                        minOf(endTime, to)
+                    } else {
+                        // Только для активных сессий используем текущее время (ограниченное концом периода)
+                        minOf(currentTime, to)
+                    }
+
                     if (end > start) (end - start) / 1000 else 0L
                 }
 
@@ -148,7 +157,14 @@ class ReportViewModel(
                 val sessions = sessionsByActivity[activity.id] ?: emptyList()
                 val activitySeconds = sessions.sumOf { session ->
                     val start = maxOf(session.startTime, from)
-                    val end = minOf(session.endTime ?: currentTime, to)
+                    val endTime = session.endTime
+                    
+                    val end = if (endTime != null) {
+                        minOf(endTime, to)
+                    } else {
+                        minOf(currentTime, to)
+                    }
+
                     if (end > start) (end - start) / 1000 else 0L
                 }
 

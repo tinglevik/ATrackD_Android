@@ -51,19 +51,46 @@ class ActivityRepository(
     suspend fun deleteGoal(goalId: Long) = dao.deleteGoal(goalId)
 
     suspend fun startActivitySession(activityId: Long) {
+        val now = System.currentTimeMillis()
         val session = ActivityLogEntity(
             activityId = activityId,
-            startTime = System.currentTimeMillis(),
+            startTime = now,
             endTime = null
         )
         dao.insertSession(session)
     }
 
     suspend fun stopActivitySession(activityId: Long) {
+        val now = System.currentTimeMillis()
         val currentSession = dao.getActiveSession(activityId)
         currentSession?.let {
-            val updated = it.copy(endTime = System.currentTimeMillis())
+            // Protection: end time cannot be before start time
+            val safeEndTime = maxOf(it.startTime, now)
+            val updated = it.copy(endTime = safeEndTime)
             dao.updateSession(updated)
+        }
+    }
+
+    suspend fun sanitizeTimestamps() {
+        val now = System.currentTimeMillis()
+        val sessions = dao.getAllSessions()
+        sessions.forEach { session ->
+            var changed = false
+            var newStart = session.startTime
+            var newEnd = session.endTime
+
+            if (session.startTime > now) {
+                newStart = now
+                changed = true
+            }
+            if (session.endTime != null && session.endTime > now) {
+                newEnd = now
+                changed = true
+            }
+
+            if (changed) {
+                dao.updateSession(session.copy(startTime = newStart, endTime = newEnd))
+            }
         }
     }
 
