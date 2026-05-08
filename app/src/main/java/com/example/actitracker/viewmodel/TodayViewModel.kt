@@ -113,19 +113,19 @@ class TodayViewModel(
 
                     entities.map { entity ->
                         val sessions = todaySessions.filter { it.activityId == entity.id }
-                        // Суммируем только ЗАВЕРШЕННЫЕ сегодня части сессий
+                        // Sum only the parts of sessions COMPLETED today
                         var totalSecondsToday = sessions.sumOf { session ->
                             val endTime = session.endTime ?: return@sumOf 0L 
                             val start = maxOf(session.startTime, startOfToday)
-                            // Дополнительная защита: если данные еще не санированы, ограничиваем тикером
+                            // Additional protection: if data is not yet sanitized, limit by ticker
                             val effectiveEnd = minOf(endTime, ticker)
                             if (effectiveEnd > start) (effectiveEnd - start) / 1000 else 0L
                         }
 
-                        // Добавляем время только для ОФИЦИАЛЬНО активной задачи
+                        // Add time only for the OFFICIALLY active task
                         if (entity.id == activeId && activeStartTime != null) {
                             val effectiveStart = maxOf(activeStartTime, startOfToday)
-                            // Здесь ticker уместен, так как задача реально запущена
+                            // Here ticker is appropriate since the task is actually running
                             if (ticker > effectiveStart) {
                                 totalSecondsToday += (ticker - effectiveStart) / 1000
                             }

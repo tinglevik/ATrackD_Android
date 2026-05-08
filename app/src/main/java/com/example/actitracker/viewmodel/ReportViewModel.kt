@@ -133,10 +133,10 @@ class ReportViewModel(
                     val endTime = session.endTime
                     
                     val end = if (endTime != null) {
-                        // Для завершенных сессий используем их endTime, ограничивая только концом периода
+                        // For completed sessions, use their endTime, limiting it only by the end of the period
                         minOf(endTime, to)
                     } else {
-                        // Только для активных сессий используем текущее время (ограниченное концом периода)
+                        // Only for active sessions, use the current time (limited by the end of the period)
                         minOf(currentTime, to)
                     }
 

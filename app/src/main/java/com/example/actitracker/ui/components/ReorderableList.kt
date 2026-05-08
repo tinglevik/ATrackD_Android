@@ -32,10 +32,9 @@ fun <T> ReorderableLazyColumn(
     var dragY by remember { mutableFloatStateOf(0f) }
     var touchOffsetWithinItem by remember { mutableFloatStateOf(0f) }
     
-    // We use a stable MutableStateList and update its content instead of replacing the instance
     val localItems = remember { mutableStateListOf<T>() }
     
-    // Sync localItems with external items only when not dragging
+    // Synchronization with external list
     LaunchedEffect(items) {
         if (draggingItemKey == null) {
             localItems.clear()
@@ -43,61 +42,76 @@ fun <T> ReorderableLazyColumn(
         }
     }
 
-    // Wrap checkForSwaps in a state to ensure LaunchEffect always uses the latest logic
-    val currentCheckForSwaps by rememberUpdatedState {
-        val draggingKey = draggingItemKey ?: return@rememberUpdatedState
-        val layoutInfo = state.layoutInfo
-        val draggingInfo = layoutInfo.visibleItemsInfo.find { it.key == draggingKey } ?: return@rememberUpdatedState
-        
-        val targetItemTop = dragY - touchOffsetWithinItem
-        val draggingCenter = targetItemTop + draggingInfo.size / 2
-        
-        val targetItem = layoutInfo.visibleItemsInfo.find { item ->
-            if (item.key == draggingKey) return@find false
+    // Main swap logic
+    val checkForSwaps = {
+        val draggingKey = draggingItemKey
+        if (draggingKey != null) {
+            val layoutInfo = state.layoutInfo
+            val draggingInfo = layoutInfo.visibleItemsInfo.find { it.key == draggingKey }
             
-            val itemCenter = item.offset + item.size / 2
-            if (item.index > draggingInfo.index) {
-                draggingCenter > itemCenter
-            } else {
-                draggingCenter < itemCenter
-            }
-        }
-        
-        if (targetItem != null) {
-            val fromIndex = localItems.indexOfFirst { itemKey(it) == draggingKey }
-            val toIndex = localItems.indexOfFirst { itemKey(it) == targetItem.key }
-            if (fromIndex != -1 && toIndex != -1) {
-                localItems.add(toIndex, localItems.removeAt(fromIndex))
+            if (draggingInfo != null) {
+                val currentItemTop = dragY - touchOffsetWithinItem
+                val draggingCenter = currentItemTop + draggingInfo.size / 2
+
+                layoutInfo.visibleItemsInfo
+                    .find { item ->
+                        if (item.key == draggingKey) return@find false
+                        val itemCenter = item.offset + item.size / 2
+                        
+                        if (item.index > draggingInfo.index) {
+                            draggingCenter > itemCenter
+                        } else {
+                            draggingCenter < itemCenter
+                        }
+                    }
+                    ?.let { targetItem ->
+                        val fromIndex = localItems.indexOfFirst { itemKey(it) == draggingKey }
+                        val toIndex = localItems.indexOfFirst { itemKey(it) == targetItem.key }
+                        
+                        if (fromIndex != -1 && toIndex != -1) {
+                            // Fix "step jumps": if we swap elements at position 0 and we are at the top
+                            val isAtTop = state.firstVisibleItemIndex == 0 && state.firstVisibleItemScrollOffset == 0
+                            
+                            localItems.add(toIndex, localItems.removeAt(fromIndex))
+                            
+                            if (isAtTop && (fromIndex == 0 || toIndex == 0)) {
+                                // Force scroll reset to 0 to avoid LazyColumn jumping
+                                state.requestScrollToItem(0)
+                            }
+                        }
+                    }
             }
         }
     }
 
-    // Auto-scroll logic
+    // Auto-scroll while dragging
     LaunchedEffect(draggingItemKey) {
         while (draggingItemKey != null && isActive) {
             val layoutInfo = state.layoutInfo
-            val viewportTop = layoutInfo.viewportStartOffset.toFloat()
-            val viewportBottom = layoutInfo.viewportEndOffset.toFloat()
-            
-            val edgeTolerance = 150f
+            val viewportHeight = layoutInfo.viewportSize.height.toFloat()
+            val edgeTolerance = 100f
             var scrollAmount = 0f
             
-            if (dragY < viewportTop + edgeTolerance) {
-                scrollAmount = (dragY - (viewportTop + edgeTolerance)) / 2.5f
-            } else if (dragY > viewportBottom - edgeTolerance) {
-                scrollAmount = (dragY - (viewportBottom - edgeTolerance)) / 2.5f
+            if (dragY < edgeTolerance) {
+                if (state.firstVisibleItemIndex > 0 || state.firstVisibleItemScrollOffset > 0) {
+                    scrollAmount = (dragY - edgeTolerance) / 2f
+                }
+            } else if (dragY > viewportHeight - edgeTolerance) {
+                if (state.canScrollForward) {
+                    scrollAmount = (dragY - (viewportHeight - edgeTolerance)) / 2f
+                }
             }
             
             if (scrollAmount != 0f) {
                 state.scrollBy(scrollAmount)
-                currentCheckForSwaps()
+                checkForSwaps()
             }
             delay(10)
         }
     }
 
     Box(modifier = modifier
-        .pointerInput(items) { // Restart pointerInput if items list object changes (e.g. after database update)
+        .pointerInput(Unit) {
             detectDragGesturesAfterLongPress(
                 onDragStart = { offset ->
                     state.layoutInfo.visibleItemsInfo
@@ -111,7 +125,7 @@ fun <T> ReorderableLazyColumn(
                 onDrag = { change, dragAmount ->
                     change.consume()
                     dragY += dragAmount.y
-                    currentCheckForSwaps()
+                    checkForSwaps()
                 },
                 onDragEnd = {
                     onReorder(localItems.toList())
@@ -125,25 +139,27 @@ fun <T> ReorderableLazyColumn(
     ) {
         LazyColumn(state = state, modifier = Modifier.fillMaxWidth()) {
             items(localItems, key = { itemKey(it) }) { item ->
-                val isDragging = draggingItemKey == itemKey(item)
-                val shadowElevation by animateDpAsState(if (isDragging) 12.dp else 0.dp, label = "")
+                val key = itemKey(item)
+                val isDragging = draggingItemKey == key
+                val shadowElevation by animateDpAsState(if (isDragging) 8.dp else 0.dp, label = "")
                 
                 val draggingModifier = if (isDragging) {
                     Modifier
                         .zIndex(10f)
                         .graphicsLayer {
-                            val info = state.layoutInfo.visibleItemsInfo.find { it.key == itemKey(item) }
+                            // Find the current offset of the element in the list to calculate the translation relative to it
+                            val info = state.layoutInfo.visibleItemsInfo.find { it.key == key }
                             if (info != null) {
                                 translationY = (dragY - touchOffsetWithinItem) - info.offset
                             }
-                            scaleX = 1.04f
-                            scaleY = 1.04f
+                            scaleX = 1.05f
+                            scaleY = 1.05f
                         }
                         .shadow(shadowElevation)
                 } else {
-                    Modifier.animateItem()
+                    Modifier.animateItem() // Ensures smooth reordering of neighbors
                 }
-                
+
                 Box(modifier = draggingModifier.fillMaxWidth()) {
                     itemContent(item, isDragging)
                 }
