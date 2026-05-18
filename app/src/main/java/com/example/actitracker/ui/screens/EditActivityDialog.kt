@@ -66,7 +66,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.example.actitracker.R
 import com.example.actitracker.data.model.ActivityItem
 import com.example.actitracker.data.model.TagItem
-import com.example.actitracker.ui.components.IconMapper
+import com.example.actitracker.ui.components.AppIcon
 import com.example.actitracker.ui.theme.ActitrackerTheme
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -189,9 +189,8 @@ fun EditActivityDialog(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(stringResource(R.string.activity_icon_label), color = dialogContentColor)
-                    Icon(
-                        imageVector = IconMapper.getIcon(selectedIconName),
-                        contentDescription = selectedIconName,
+                    AppIcon(
+                        iconName = selectedIconName,
                         tint = dialogContentColor,
                         modifier = Modifier.size(32.dp)
                     )

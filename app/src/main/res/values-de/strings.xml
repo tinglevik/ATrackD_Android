@@ -169,7 +169,8 @@
     <string name="category_work_study">Arbeit &amp; Studium</string>
     <string name="category_nature">Natur</string>
     <string name="category_food_drinks">Essen &amp; Trinken</string>
-    <string name="category_symbols">Weitere Symbole</string>
+    <string name="category_leisure">Freizeit &amp; Reisen</string>
+    <string name="category_symbols">Andere Symbole</string>
 
     <!-- General / Navigation -->
     <string name="back_button">Zurück</string>

@@ -71,8 +71,8 @@ import com.example.actitracker.R
 import com.example.actitracker.data.model.ActivityItem
 import com.example.actitracker.data.model.TagItem
 import com.example.actitracker.ui.components.ActivityRowDimens
+import com.example.actitracker.ui.components.AppIcon
 import com.example.actitracker.ui.components.CircleIconButton
-import com.example.actitracker.ui.components.IconMapper
 import com.example.actitracker.ui.components.ReorderableLazyColumn
 import com.example.actitracker.ui.components.SwipeableActivityRow
 import com.example.actitracker.ui.components.formatSeconds
@@ -622,9 +622,8 @@ private fun CurrentTaskBlock(
                             Row(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Icon(
-                                    imageVector = IconMapper.getIcon(activity.icon),
-                                    contentDescription = null,
+                                AppIcon(
+                                    iconName = activity.icon,
                                     tint = activity.color,
                                     modifier = Modifier.size(ActivityRowDimens.ACTIVITY_ROW_ICON_SIZE.dp)
                                 )

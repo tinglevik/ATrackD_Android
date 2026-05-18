@@ -123,6 +123,8 @@ dependencies {
     // Additional UI
     // -----------------------------
     implementation(libs.accompanist.systemuicontroller)
+    implementation(libs.coil.compose)
+    implementation(libs.coil.svg)
 
     // -----------------------------
     // Debug

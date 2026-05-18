@@ -94,9 +94,8 @@ fun ActivityRow(
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Icon(
-                        imageVector = IconMapper.getIcon(activity.icon),
-                        contentDescription = null,
+                    AppIcon(
+                        iconName = activity.icon,
                         tint = activity.color,
                         modifier = Modifier.size(ActivityRowDimens.ACTIVITY_ROW_ICON_SIZE.dp)
                     )

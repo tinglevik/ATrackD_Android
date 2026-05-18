@@ -3,7 +3,14 @@ package com.example.actitracker.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -14,21 +21,41 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.res.stringResource
 import com.example.actitracker.R
+import com.example.actitracker.data.search.IconSearchRepository
+import com.example.actitracker.ui.components.AppIcon
+import com.example.actitracker.ui.components.IconInfo
 import com.example.actitracker.ui.components.IconMapper
+import com.example.actitracker.ui.theme.ActitrackerTheme
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,26 +69,75 @@ fun IconPickerScreen(
     var searchQuery by remember { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
     val dummyFocusRequester = remember { FocusRequester() }
-    
-    val allIcons = remember { IconMapper.getAllIcons() }
-    
-    val filteredIcons = remember(searchQuery) {
+    val context = LocalContext.current
+    val searchRepository = remember { IconSearchRepository(context) }
+
+    var allIcons by remember { mutableStateOf<List<IconInfo>>(emptyList()) }
+    var semanticResults by remember { mutableStateOf<List<IconInfo>>(emptyList()) }
+
+    /**
+     * Initialize search index and load all icons as default
+     */
+    LaunchedEffect(Unit) {
+        searchRepository.initialize()
+        // Load all icons and group them by logical category immediately
+        val all = searchRepository.getAllIcons().mapNotNull { result ->
+            IconMapper.getIconInfo(result.iconId)
+        }
+        allIcons = all
+    }
+
+    /**
+     * Incremental search with debounce
+     */
+    LaunchedEffect(searchQuery) {
+        if (searchQuery.isNotBlank()) {
+            delay(300) // Debounce 300ms
+            val results = searchRepository.search(searchQuery).mapNotNull { result ->
+                IconMapper.getIconInfo(result.iconId)
+            }
+            semanticResults = results
+        } else {
+            semanticResults = emptyList()
+        }
+    }
+
+    val filteredIcons = remember(searchQuery, semanticResults, allIcons) {
         if (searchQuery.isBlank()) {
             allIcons
         } else {
-            allIcons.filter { iconInfo ->
-                iconInfo.name.contains(searchQuery, ignoreCase = true) ||
-                iconInfo.category.contains(searchQuery, ignoreCase = true) ||
-                iconInfo.tags.any { it.contains(searchQuery, ignoreCase = true) }
-            }
+            semanticResults
         }
     }
 
     val groupedIcons = remember(filteredIcons) {
+        /**
+         *Categories in the desired order from IconMapper
+         */
+        val order = listOf(
+            "General",
+            "Activities",
+            "Work & Study",
+            "Leisure & Travel",
+            "Nature",
+            "Food & Drinks",
+            "Other Symbols"
+        )
+
         filteredIcons.groupBy { it.category }
+            .toList()
+            .sortedBy { (category, _) ->
+                val index = order.indexOf(category)
+                /**
+                 * If category is not in our list, put it at the end.
+                 */
+                if (index != -1) index else order.size
+            }
     }
 
-    // Force focus onto a dummy element immediately to prevent keyboard from popping up
+    /**
+     * Force focus onto a dummy element immediately to prevent keyboard from popping up
+     */
     LaunchedEffect(Unit) {
         dummyFocusRequester.requestFocus()
     }
@@ -75,7 +151,9 @@ fun IconPickerScreen(
                 indication = null
             ) { focusManager.clearFocus() }
     ) {
-        // Dummy element to hold initial focus
+        /**
+         * Dummy element to hold initial focus
+         */
         Box(
             modifier = Modifier
                 .size(0.dp)
@@ -97,19 +175,36 @@ fun IconPickerScreen(
             colors = TopAppBarDefaults.topAppBarColors(containerColor = backgroundColor)
         )
 
-        // Search Bar
+        /**
+         * Search Bar
+         */
         OutlinedTextField(
             value = searchQuery,
             onValueChange = { searchQuery = it },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp),
-            placeholder = { Text(stringResource(R.string.search_icons_hint), color = contentColor.copy(alpha = 0.5f)) },
-            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = contentColor) },
+            placeholder = {
+                Text(
+                    stringResource(R.string.search_icons_hint),
+                    color = contentColor.copy(alpha = 0.5f)
+                )
+            },
+            leadingIcon = {
+                Icon(
+                    Icons.Default.Search,
+                    contentDescription = null,
+                    tint = contentColor
+                )
+            },
             trailingIcon = {
                 if (searchQuery.isNotEmpty()) {
                     IconButton(onClick = { searchQuery = "" }) {
-                        Icon(Icons.Default.Close, contentDescription = stringResource(R.string.clear_search), tint = contentColor)
+                        Icon(
+                            Icons.Default.Close,
+                            contentDescription = stringResource(R.string.clear_search),
+                            tint = contentColor
+                        )
                     }
                 }
             },
@@ -133,8 +228,14 @@ fun IconPickerScreen(
         ) {
             groupedIcons.forEach { (category, iconsInGroup) ->
                 item(span = { GridItemSpan(maxLineSpan) }) {
+                    val categoryRes = IconMapper.getCategoryRes(category)
+                    val categoryName = if (categoryRes != null) {
+                        stringResource(categoryRes)
+                    } else {
+                        category // Fallback for dynamic categories like "Lucide"
+                    }
                     Text(
-                        text = stringResource(IconMapper.getCategoryRes(category)),
+                        text = categoryName,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         color = contentColor.copy(alpha = 0.6f),
@@ -148,13 +249,16 @@ fun IconPickerScreen(
                             .padding(2.dp)
                             .aspectRatio(1f)
                             .clip(CircleShape)
-                            .background(if (iconInfo.name == initialIconName) contentColor.copy(alpha = 0.2f) else Color.Transparent)
+                            .background(
+                                if (iconInfo.name == initialIconName) contentColor.copy(
+                                    alpha = 0.2f
+                                ) else Color.Transparent
+                            )
                             .clickable { onIconSelected(iconInfo.name) },
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = iconInfo.icon,
-                            contentDescription = iconInfo.name,
+                        AppIcon(
+                            iconName = iconInfo.name,
                             tint = contentColor,
                             modifier = Modifier.size(20.dp)
                         )
@@ -162,5 +266,17 @@ fun IconPickerScreen(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun IconPickerScreenPreview() {
+    ActitrackerTheme {
+        IconPickerScreen(
+            initialIconName = "Star",
+            onIconSelected = {},
+            onDismiss = {}
+        )
     }
 }

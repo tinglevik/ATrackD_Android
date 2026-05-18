@@ -7,16 +7,25 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.content.pm.ServiceInfo
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Build
 import android.os.IBinder
 import android.view.View
 import android.widget.RemoteViews
+import androidx.compose.ui.graphics.toArgb
 import androidx.core.app.NotificationCompat
+import androidx.core.graphics.createBitmap
+import coil.ImageLoader
+import coil.decode.SvgDecoder
+import coil.request.ImageRequest
+import coil.size.Size
 import com.example.actitracker.ActiTrackerApplication
 import com.example.actitracker.MainActivity
 import com.example.actitracker.R
+import com.example.actitracker.data.SettingsDataStore
 import com.example.actitracker.data.model.ActivityItem
+import com.example.actitracker.data.search.IconSearchRepository
 import com.example.actitracker.receiver.ActivityActionReceiver
 import com.example.actitracker.ui.components.IconMapper
 import kotlinx.coroutines.CoroutineScope
@@ -26,6 +35,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Calendar
 
 class ActivityTrackerService : Service() {
@@ -42,23 +52,34 @@ class ActivityTrackerService : Service() {
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var currentActivities: List<ActivityItem> = emptyList()
     private var activeActivityId: Long? = null
-    
-    private var backgroundColor: Int = Color.WHITE
-    private var contentColor: Int = Color.BLACK
+
+    private var backgroundColor: Int = SettingsDataStore.DEFAULT_COLOR_ARGB
+    private var contentColor: Int = SettingsDataStore.DEFAULT_CONTENT_COLOR_ARGB
 
     private lateinit var app: ActiTrackerApplication
     private lateinit var notificationManager: NotificationManager
+    private lateinit var imageLoader: ImageLoader
+    private lateinit var iconSearchRepository: IconSearchRepository
+    private val iconCache = mutableMapOf<String, Bitmap>()
 
     override fun onCreate() {
         super.onCreate()
         app = application as ActiTrackerApplication
         notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        imageLoader = ImageLoader.Builder(this)
+            .components { add(SvgDecoder.Factory()) }
+            .build()
+
+        iconSearchRepository = IconSearchRepository(this)
+        serviceScope.launch {
+            iconSearchRepository.initialize()
+        }
 
         createNotificationChannel()
-        
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             startForeground(
-                NOTIFICATION_ID, 
+                NOTIFICATION_ID,
                 buildSimpleNotification(),
                 ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
             )
@@ -75,6 +96,7 @@ class ActivityTrackerService : Service() {
                 val activityId = intent.getLongExtra(EXTRA_ACTIVITY_ID, -1L)
                 if (activityId != -1L) handleStart(activityId)
             }
+
             ACTION_STOP -> {
                 val activityId = intent.getLongExtra(EXTRA_ACTIVITY_ID, -1L)
                 if (activityId != -1L) handleStop(activityId)
@@ -101,14 +123,24 @@ class ActivityTrackerService : Service() {
                         ActivityItem(
                             id = entity.id,
                             name = entity.name,
-                            color = androidx.compose.ui.graphics.Color(entity.color),
+                            color = androidx.compose.ui.graphics
+                                .Color(entity.color.toULong()),
                             icon = entity.icon,
                             showInQuickPanel = true
                         )
                     }
             }.collect { items ->
                 currentActivities = items
-                
+
+                /**
+                 * Pre-load icons
+                 * */
+                items.forEach { activity ->
+                    if (!iconCache.containsKey(activity.icon)) {
+                        loadIconToCache(activity)
+                    }
+                }
+
                 if (items.isEmpty()) {
                     stopForegroundService()
                 } else {
@@ -127,11 +159,13 @@ class ActivityTrackerService : Service() {
         serviceScope.launch {
             app.repository.closeAllActiveSessionsExcept(activityId)
             app.repository.startActivitySession(activityId)
-            
+
             val now = System.currentTimeMillis()
             val currentStarts = app.settingsDataStore.firstStartTimesFlow.first().toMutableMap()
-            
-            if (currentStarts[activityId] == null || !isSameDay(currentStarts[activityId]!!, now)) {
+
+            if (currentStarts[activityId] == null
+                || !isSameDay(currentStarts[activityId]!!, now)
+            ) {
                 currentStarts[activityId] = now
                 app.settingsDataStore.saveFirstStartTimes(currentStarts)
             }
@@ -150,7 +184,41 @@ class ActivityTrackerService : Service() {
             try {
                 app.repository.stopActivitySession(activityId)
             } catch (e: Exception) {
-                android.util.Log.e("ActivityTrackerService", "Error stopping activity $activityId", e)
+                android.util.Log.e(
+                    "ActivityTrackerService",
+                    "Error stopping activity $activityId", e
+                )
+            }
+        }
+    }
+
+    private fun loadIconToCache(activity: ActivityItem) {
+        val iconInfo = IconMapper.getIconInfo(activity.icon) ?: return
+
+        serviceScope.launch(Dispatchers.IO) {
+            val request = ImageRequest.Builder(this@ActivityTrackerService)
+                .data(iconInfo.assetPath!!)
+                .size(Size(100, 100))
+                .allowHardware(false) // Required for drawing to Canvas if it's a Bitmap
+                .build()
+
+            val result = imageLoader.execute(request)
+            result.drawable?.let { drawable ->
+                val b = createBitmap(100, 100)
+                val canvas = android.graphics.Canvas(b)
+                /**
+                 * If it's a Vector/SVG, we need to tint it white before caching
+                 * so setColorFilter in RemoteViews
+                 * can then apply the actual activity color correctly.
+                 */
+                drawable.setTint(Color.WHITE)
+                drawable.setBounds(0, 0, canvas.width, canvas.height)
+                drawable.draw(canvas)
+
+                iconCache[activity.icon] = b
+                withContext(Dispatchers.Main) {
+                    updateNotification()
+                }
             }
         }
     }
@@ -174,7 +242,7 @@ class ActivityTrackerService : Service() {
 
     private fun buildNotification(): Notification {
         val openAppIntent = buildOpenAppIntent()
-        
+
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_today_outline)
             .setContentIntent(openAppIntent)
@@ -197,13 +265,18 @@ class ActivityTrackerService : Service() {
 
     private fun buildRemoteViews(): RemoteViews {
         val views = RemoteViews(packageName, R.layout.notification_activity_list)
-        
-        val safeBg = if (backgroundColor == 0) Color.WHITE else backgroundColor
-        val safeContent = if (contentColor == 0) Color.BLACK else contentColor
 
-        views.setInt(R.id.notification_root, "setBackgroundColor", safeBg)
-        views.setTextColor(R.id.notification_app_name, safeContent)
-        views.setInt(R.id.notification_app_icon, "setColorFilter", safeContent)
+        views.setInt(
+            R.id.notification_root,
+            "setBackgroundColor",
+            backgroundColor
+        )
+        views.setTextColor(R.id.notification_app_name, contentColor)
+        views.setInt(
+            R.id.notification_app_icon,
+            "setColorFilter",
+            contentColor
+        )
 
         views.removeAllViews(R.id.notification_activities_container)
 
@@ -211,27 +284,93 @@ class ActivityTrackerService : Service() {
             val isActive = activity.id == activeActivityId
             val itemView = RemoteViews(packageName, R.layout.notification_activity_item)
 
-            // Use Emoji from mapper for guaranteed visibility
-            itemView.setTextViewText(R.id.activity_icon, IconMapper.getEmoji(activity.icon))
-            
-            itemView.setTextViewText(R.id.activity_name, activity.name)
-            itemView.setTextColor(R.id.activity_name, safeContent)
-
-            if (isActive) {
-                itemView.setInt(R.id.activity_active_indicator, "setColorFilter", safeContent)
-                itemView.setInt(R.id.activity_active_indicator, "setImageAlpha", 255)
+            val bitmap = iconCache[activity.icon]
+            val activityColor = if (activity.color.toArgb() != 0) {
+                activity.color.toArgb()
             } else {
-                itemView.setInt(R.id.activity_active_indicator, "setImageAlpha", 0)
+                /**
+                 * If toArgb is 0, it might be due to the shifted 64-bit format seen in the DB
+                 * Extracting the 32-bit ARGB from the Color's internal value if possible
+                 */
+                (activity.color.value shr 32).toInt()
+                    .let { if (it == 0) activity.color.toArgb() else it }
             }
 
-            itemView.setInt(R.id.activity_divider, "setColorFilter", safeContent)
-            itemView.setInt(R.id.activity_divider, "setImageAlpha", 50)
+            if (bitmap != null) {
+                itemView.setViewVisibility(
+                    R.id.activity_icon,
+                    View.GONE
+                )
+                itemView.setViewVisibility(
+                    R.id.activity_icon_image,
+                    View.VISIBLE
+                )
+
+                /**
+                 * Using setImageViewBitmap + setColorFilter as it's more reliable for RemoteViews
+                 */
+                itemView.setImageViewBitmap(R.id.activity_icon_image, bitmap)
+                itemView.setInt(
+                    R.id.activity_icon_image,
+                    "setColorFilter",
+                    activityColor)
+            } else {
+                itemView.setViewVisibility(
+                    R.id.activity_icon,
+                    View.VISIBLE)
+                itemView.setViewVisibility(
+                    R.id.activity_icon_image,
+                    View.GONE)
+                itemView.setTextViewText(
+                    R.id.activity_icon,
+                    IconMapper.getEmoji()
+                )
+                /**
+                 * Note: emojis cannot be easily tinted here, they use their own colors
+                 */
+            }
+
+            itemView.setTextViewText(R.id.activity_name, activity.name)
+            itemView.setTextColor(R.id.activity_name, contentColor)
+
+            if (isActive) {
+                itemView.setInt(
+                    R.id.activity_active_indicator,
+                    "setColorFilter",
+                    contentColor
+                )
+                itemView.setInt(
+                    R.id.activity_active_indicator,
+                    "setImageAlpha",
+                    255
+                )
+            } else {
+                itemView.setInt(
+                    R.id.activity_active_indicator,
+                    "setImageAlpha",
+                    0
+                )
+            }
+
+            itemView.setInt(
+                R.id.activity_divider,
+                "setColorFilter",
+                contentColor
+            )
+            itemView.setInt(
+                R.id.activity_divider,
+                "setImageAlpha",
+                50
+            )
             itemView.setViewVisibility(
                 R.id.activity_divider,
                 if (index < currentActivities.size - 1) View.VISIBLE else View.GONE
             )
 
-            val toggleIntent = Intent(this, ActivityActionReceiver::class.java).apply {
+            val toggleIntent = Intent(
+                this,
+                ActivityActionReceiver::class.java
+            ).apply {
                 action = ActivityActionReceiver.ACTION_TOGGLE
                 putExtra(ActivityActionReceiver.EXTRA_ACTIVITY_ID, activity.id)
                 putExtra(ActivityActionReceiver.EXTRA_IS_ACTIVE, isActive)
